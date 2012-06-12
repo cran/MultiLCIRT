@@ -1,0 +1,117 @@
+\name{est_multi_poly}
+\alias{est_multi_poly}
+%- Also NEED an '\alias' for EACH other topic documented here.
+
+\title{Estimate multidimensional LC IRT model for dichotomous and polythomous responses}
+
+\description{The function performs maximum likelihood estimation of the parameters of the IRT models
+assuming a discrete distribution for the ability. Every ability level corresponds to a latent
+class of subjects in the reference population. Maximum likelihood estimation is based on Expectation-
+Maximization algorithm.}
+
+\usage{est_multi_poly(S, yv, k, start = 0, link = 0, disc = 0, difl = 0, multi = 1:J, piv, Th, bec, gac)}
+%- maybe also 'usage' for other objects documented here.
+
+\arguments{
+  \item{S}{matrix of all response sequences observed at least once in the sample and listed row-by-row
+           (use 999 for missing response)}
+  \item{yv}{vector of the frequencies of every response configuration in \code{S}}
+  \item{k}{number of ability levels (or latent classes)}
+  \item{start}{method of initialization of the algorithm (0 = deterministic, 1 = random, 2 = arguments given as
+               input)}
+  \item{link}{type of link function (0 = no link function, 1 = global logits, 2 = local logits);
+              with no link function the Latent Class model results; with global logits the Graded Response model
+              results; with local logits the  Partial Credit results (with dichotomous responses, global logits
+              is the same as using local logits resulting in the Rasch or the 2PL model depending on the value
+              assigned to disc)}
+  \item{disc}{indicator of constraints on the discriminating indices (0 = all equal to one, 1 = free)}
+  \item{difl}{indicator of constraints on the difficulty levels (0 = free, 1 = rating scale parameterization)}
+  \item{multi}{matrix with a number of rows equal to the number of dimensions and elements in each row
+               equal to the indices of the items measuring the dimension corresponding to that row}
+  \item{piv}{initial value of the vector of weights of the latent classes (if start=2)}
+  \item{Th}{initial value of the matrix of the abilities (if start=2)}
+  \item{bec}{initial vector of difficulty parameters (if start=2)}
+  \item{gac}{initial vector of discriminant indices (if start=2)}
+}
+
+%\details{
+%%%  ~~ If necessary, more details than the description above ~~
+%}
+
+\value{
+\item{piv}{estimated vector of weights of the latent classes (if start=2)}
+\item{Th}{estimated matrix of ability levels for each dimension and latent class}
+\item{Bec}{estimated vector of difficulty levels for every item (split in two vectors if difl=1)}
+\item{gac}{estimated vector of discriminating indices for every item}
+\item{fv}{vector indicating the reference item chosen for each latent dimension}
+\item{Phi}{array of the conditional response probabilities for every item and latent class}
+\item{Pp}{matrix of the posterior probabilities for each response configuration and latent class}
+\item{lk}{log-likelhood at convergence of the EM algorithm}
+\item{np}{number of free parameters}
+\item{aic}{Akaike information Criterion index}
+\item{bic}{Bayesian information Criterion index}
+}
+
+\references{
+Bartolucci, F. (2007), A class of multidimensional IRT models for testing unidimensionality and clustering
+items, \emph{Psychometrika}, \bold{72}, 141-157.
+
+Bacci, S., Bartolucci, F. and Gnaldi, M. (2012), A class of Multidimensional Latent Class IRT models for 
+ordinal polytomous item responses, \emph{Technical report}, http://arxiv.org/abs/1201.4667.
+}
+
+\author{Francesco Bartolucci, Silvia Bacci, Michela Gnaldi - University of Perugia (IT)}
+
+%\note{
+%%%  ~~further notes~~
+%}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+%\seealso{
+%%% ~~objects to See Also as \code{\link{help}}, ~~~
+%}
+
+\examples{
+## Estimation of different Multidimensional LC IRT models with binary responses
+# Aggregate data
+data(naep)
+X = as.matrix(naep)
+out = aggr_data(X)
+S = out$data_dis
+yv = out$freq
+# Define matrix to allocate each item to one dimension 
+multi1 = rbind(c(1,2,9,10),c(3,5,8,11),c(4,6,7,12))
+# Three-dimensional Rasch model with 3 latent classes
+out1 = est_multi_poly(S,yv,k=3,start=0,link=1,multi=multi1)
+\dontrun{
+# Three-dimensional 2PL model with 3 latent classes
+out2 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
+}
+
+## Estimation of different Multidimensional LC IRT models with ordinal responses
+# Aggregate data
+data(hads)
+X = as.matrix(hads)
+out = aggr_data(X)
+S = out$data_dis
+yv = out$freq
+# Define matrix to allocate each item to one dimension 
+multi1 = rbind(c(2,6,7,8,10,11,12),c(1,3,4,5,9,13,14))
+# Bidimensional LC Graded Response Model with 3 latent classes 
+# (free discriminating and free difficulty parameters)
+out1 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
+\dontrun{
+# Bidimensional LC Partial Credit Model with 3 latent classes 
+# (constrained discrimination and free difficulty parameters)
+out2 = est_multi_poly(S,yv,k=3,start=0,link=2,multi=multi1)
+# Bidimensional LC Rating Scale Model with 3 latent classes 
+# (constrained discrimination and constrained difficulty parameters)
+out3 = est_multi_poly(S,yv,k=3,start=0,link=2,difl=1,multi=multi1)
+}
+}
+
+%% Add one or more standard keywords, see file 'KEYWORDS' in the
+%% R documentation directory.
+\keyword{maximum likelihood estimation}
+\keyword{Expectation-Maximization algorithm}% __ONLY ONE__ keyword per line
