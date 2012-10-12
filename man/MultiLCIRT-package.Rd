@@ -13,14 +13,15 @@ of dichotomous and ordinal polythomous outcomes
 under the assumption of multidimensionality and discreteness of latent traits (abilities). 
 Every level of the abilities identify a latent class of subjects. The fitting 
 algorithms are based on the Expectation-Maximization (EM) paradigm and 
-allow for missing responses and for different item parameterizations.}
+allow for missing responses and for different item parameterizations. The package also allows for the inclusion
+individual covariates affecting the class weights.}
 
 \details{
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2012-06-12\cr
+Version: \tab 2.0\cr
+Date: \tab 2012-10-12\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,

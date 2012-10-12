@@ -1,22 +1,68 @@
-est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,bec,gac){
+est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
+                           multi=1:J,piv,Th,bec,gac,fort=FALSE,tol=10^-10){
+
+#        [piv,Th,Bec,gac,fv,Phi,Pp,lk,np,aic,bic] = est_multi_poly(S,yv,k,start,link,disc,difl,multi,piv,Th,bec,gac)
+#
+# Fit Latent Class model and some restricted versions with k classes for ordinal (NA for missing data)
+# 
+# S    : matrix of available configurations
+# X    : matrix of corresponding covariates affecting the ability
+# yv   : frequencies of the available configurations
+# k    : number of latent classes
+# X    : matrix of covariates for the multinomial logit on the class weights
+# start: type of startgine values (0 = deterministic, 1 = random)
+# link : type of link (0 = LC, 1 = GRM, 2 = PCM)
+# disc : discriminating indices (0 = constrained, 1 = free)
+# difl : difficulty levels (0 = free, 1 = additive decomposition)
+# lk   : maximum log-likelihood
+# piv  : weights of the latent classes
+# Phi  : conditional distributions given the latent classes
+# np   : number of free parameters
+# bic  : Bayesian information criterion
+# Th,be,ga : parameters for the model 4 (Th=Psi if start==3)
+# fv   : list of items constrained
+# fort : T for using fortran code for covariates, F using R code only
+# tol  : relative tolerance level for convergence
 
 # With k=1
 	cat("*-------------------------------------------------------------------------------*\n")
-	if(k==1) cat("fit only for LC model with no other imput\n")
+	if(k==1){
+	  cat("fit only for LC model with no other imput\n")
+	  X = NULL
+	}
 # Preliminaries
-    miss = any(S==999)
+# check problems with standard errors
+    cov = !is.null(X)
+    if(cov) X = as.matrix(X)
+    miss = any(is.na(S))
+	ns = nrow(S); J = ncol(S)
     if(miss){
     	cat("Missing data in the dataset, units and items without responses are removed\n")
-    	ind = apply(S<999,1,any)
-    	S = S[ind,]; yv = yv[ind]
-    	ind = apply(S<999,2,any)
-    	S = S[,ind]
-	    miss = any(S==999)
+    	ind = which(apply(is.na(S),1,all))
+    	if(length(ind)>0){
+        	S = S[-ind,]; yv = yv[-ind]
+        	if(!is.null(X)) X = as.matrix(X[-ind,])
+        	ind = which(apply(is.na(S),2,all))
+        	if(length(ind)>0){
+        	    S = S[,-ind]
+	            miss = any(is.na(S))
+	        }
+	    }
     }
-    if(miss){R=(S<999); S[S==999]=0}
+    if(miss){R=1*(!is.na(S)); S[is.na(S)]=0}
 	l = max(S)+1
-	n = sum(yv)
 	ns = nrow(S); J = ncol(S)
+	n = sum(yv)
+# checks about the covariates
+    if(cov){
+    	ncov = ncol(X)
+    	out = aggr_data(X)
+    	Xdis = out$data_dis; Xlabel = out$label; Xndis = max(out$label)
+    	XXdis = array(0,c(k,(k-1)*(ncov+1),Xndis))
+    	if(k==2) II = as.matrix(c(0,1)) else {II = diag(k); II = II[,-1]}
+    	for(i in 1:Xndis) XXdis[,,i] = II%x%t(c(1,Xdis[i,]))
+    }
+# about models
 	if(link==1) ltype = "g" else if(link==2) ltype = "l"
 	if(link == 1 || link == 2){
 		if(is.vector(multi)) rm = 1
@@ -114,7 +160,11 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
 	out = matr_glob(l); Co = out$Co; Ma = out$Ma
 # Starting values
 	if(start == 0){
-		piv = rep(1,k)/k # latent class probabilities
+		if(cov){
+		    de = rep(0,(k-1)*(ncov+1)); piv = NULL
+	    }else{
+			be = NULL; piv = rep(1,k)/k
+		} # latent class probabilities
 		if(k==1) grid = 0 else grid = seq(-k,k,2*k/(k-1))
 		Phi = array(0,c(l,J,k)) # probability every response
 		for(j in 1:J){
@@ -125,7 +175,13 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
 		}
 	}
 	if(start == 1){
-		piv = runif(k); piv = piv/sum(piv)
+		if(cov){
+			de = rnorm((k-1)*(ncov+1))/5
+			piv = NULL
+		}else{
+			piv = runif(k)
+			piv = piv/sum(piv)
+		}
 		Phi = array(runif(l*J*k),c(l,J,k))
 		for(c in 1:k) for(j in 1:J) Phi[,j,c] = Phi[,j,c]/sum(Phi[,j,c]);
 	}  
@@ -137,32 +193,37 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
 	}else{
 		for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*Phi[S[,j]+1,j,c]
 	}
-	if(k==1) Pj=Psi else Pj = Psi%*%diag(piv)
+	if(cov){
+	    Piv = matrix(0,ns,k)
+	    out = prob_multilogit(XXdis,de,Xlabel,fort=fort)
+	    Pdis = out$Pdis; Piv = out$P
+	}else Piv = rep(1,ns)%o%piv
+	if(k==1) Pj=Psi else Pj = Psi*Piv
 	pm = rowSums(Pj)
 	lk = sum(yv*log(pm))
 	cat(c("Model with multdimensional structure\n"))
 	print(multi)
-	cat(c("Link functoin of type =        ",link,"\n"))
+	cat(c("Model of type =                ",link,"\n"))
 	cat(c("Discrimination index =         ",disc,"\n"))
 	cat(c("Constraints on the difficulty =",difl,"\n"))
 	if(disc==0 || length(ga)==0){
     	cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-    	cat("  iteration |   classes   |     link    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
+    	cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
     	cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
 	}else if(disc==1){
 		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-		cat("  iteration |   classes   |     link    |    lk       |    lk-lko   |      dis    |   min(ga)   |   max(ga)   |   min(par)  |   max(par)  |\n");
+		cat("  iteration |   classes   |    model    |    lk       |    lk-lko   |      dis    |   min(ga)   |   max(ga)   |   min(par)  |   max(par)  |\n");
 		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
 
 	}
 	cat(sprintf("%11g",c(0,k,link,lk)),"\n",sep=" | ")
  	it = 0; lko = lk-10^10; dis = 0; par = 0; dga = NULL
 # Iterate until convergence
-	while(((abs(lk-lko)>10^-5) && it<10^4) || it<2){
+	while(((abs(lk-lko)/abs(lko)>tol) && it<10^4) || it<2){
 		it = it+1
-		paro = par; gao = ga; pivo = piv; lko = lk
+		paro = par; gao = ga; pivo = piv; deo = de; lko = lk
 # ---- E-step ----
-		V = ((yv/pm)%*%t(piv))*Psi; sV = colSums(V)
+		V = ((yv/pm)%o%rep(1,k))*Piv*Psi; sV = colSums(V)
 # ---- M-step ----
 		if(link==0){  # LC model
 			if(miss){
@@ -225,7 +286,10 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
 			Phi = array(t(P),c(l,J,k))
     		}
 # Update piv
-		piv = sV/n
+        if(cov){
+            out = est_multilogit(V,XXdis,Xlabel,de,Pdis,fort=fort)
+			de = out$be; Pdis = out$Pdis; Piv = out$P
+        }else piv = sV/n
 # Compute log-likelihood
 		Psi = matrix(1,ns,k);
 		if(miss){
@@ -233,9 +297,9 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
 		}else{
 			for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*Phi[S[,j]+1,j,c]
 		}
-		if(k==1) Pj=Psi else Pj = Psi%*%diag(piv)
-		pm = rowSums(Pj)
-		lk = sum(yv*log(pm))
+		if(k==1) Pj=Psi else Pj = Psi*Piv
+        pm = rowSums(Pj)
+	    lk = sum(yv*log(pm))
 		dis = max(c(abs(par-paro),abs(ga-gao),abs(piv-pivo)))
 		if(it/10==floor(it/10)){
 			if(disc==0 || length(ga)==0) cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ") else{
@@ -253,8 +317,12 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
 		}
 	}
 # Compute number of parameters  
-	if(link == 0) np = k*J*(l-1)+k-1 else if(link==1 || link==2){
-		np = k*rm+disc*(J-rm)+k-1
+	if(link == 0){
+	  np = k*J*(l-1)
+      if(cov) np = np+(k-1)*(ncov+1) else np = np+k-1
+    }else if(link==1 || link==2){
+      np = k*rm+disc*(J-rm)
+      if(cov) np = np+(k-1)*(ncov+1) else np = np+k-1
 		if(difl==0) np = np+(l-1)*J-rm
 		else if(difl==1) np = np+J-rm+l-2
 	}
@@ -278,6 +346,7 @@ est_multi_poly <- function(S,yv,k,start=0,link=0,disc=0,difl=0,multi=1:J,piv,Th,
     gac = rep(1,J); gac[indga] = ga
     Th = matrix(th,rm,k)
   }
-  Pp = ((1./pm)%*%t(piv))*Psi
-  out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,Pp=Pp,lk=lk,np=np,aic=aic,bic=bic)
+  Pp = ((1./pm)%o%rep(1,k))*Piv*Psi
+  if(cov) De = matrix(de,ncov+1,k-1) else De = NULL
+  out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,Pp=Pp,lk=lk,np=np,aic=aic,bic=bic)
 }

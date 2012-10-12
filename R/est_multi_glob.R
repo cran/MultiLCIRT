@@ -1,5 +1,23 @@
-est_multi_glob <-
-function(yv,X,model,ind=rep(1,length(yv)),w=rep(1,length(yv)),be=NULL){
+est_multi_glob<-function(yv,X,model,ind=rep(1,length(yv)),w=rep(1,length(yv)),be=NULL){
+
+#        [be,lk,P] = est_multi_glob(yv,X,model,ind=rep(1,length(yv)),w=rep(1,length(yv)),be=NULL)
+#
+# Fit multinomal logit and proportional odds models
+#
+# INPUT:
+# y:     vector of responses (n x 1)
+# X:     matrix of covariates (l-1 x nc x ni)
+# model: "m" = multinomial with first reference cateogory
+#        "g" = version based on global logits 
+#        "l" = version based on local logits 
+# ind:   list of indices of X for each observation in y
+# w:     vector of weights
+# be:    initial parameter vector if available
+#
+# OUTPUT:
+# be:  parameters estimates
+# lk:  log-likelihood
+# P:   matrix of probabilities
 
 # Preliminaries
 	l = nrow(X)+1

@@ -4,7 +4,7 @@
 \title{Aggregate data}
 \description{Given a matrix of configurations (covariates and responses) unit-by-unit, this
 	function finds the corresponding matrix of distinct configurations and the corresponding 
-	vector of frequencies.}
+	vector of frequencies (it does not work properly with missing data).}
 \usage{
 aggr_data(data)
 }

@@ -9,14 +9,16 @@ assuming a discrete distribution for the ability. Every ability level correspond
 class of subjects in the reference population. Maximum likelihood estimation is based on Expectation-
 Maximization algorithm.}
 
-\usage{est_multi_poly(S, yv, k, start = 0, link = 0, disc = 0, difl = 0, multi = 1:J, piv, Th, bec, gac)}
+\usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
+	difl = 0, multi = 1:J, piv, Th, bec, gac, fort = FALSE, tol = 10^-10)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
   \item{S}{matrix of all response sequences observed at least once in the sample and listed row-by-row
-           (use 999 for missing response)}
+           (use NA for missing response)}
   \item{yv}{vector of the frequencies of every response configuration in \code{S}}
   \item{k}{number of ability levels (or latent classes)}
+  \item{X}{matrix of covariates that affects the weights}
   \item{start}{method of initialization of the algorithm (0 = deterministic, 1 = random, 2 = arguments given as
                input)}
   \item{link}{type of link function (0 = no link function, 1 = global logits, 2 = local logits);
@@ -32,6 +34,9 @@ Maximization algorithm.}
   \item{Th}{initial value of the matrix of the abilities (if start=2)}
   \item{bec}{initial vector of difficulty parameters (if start=2)}
   \item{gac}{initial vector of discriminant indices (if start=2)}
+  \item{fort}{to use fortran routines when possible}
+  \item{tol}{tollerance level for checking convergence of the algorithm as relative difference between 
+  	         consecutive log-likelihoods}
 }
 
 %\details{
@@ -45,6 +50,8 @@ Maximization algorithm.}
 \item{gac}{estimated vector of discriminating indices for every item}
 \item{fv}{vector indicating the reference item chosen for each latent dimension}
 \item{Phi}{array of the conditional response probabilities for every item and latent class}
+\item{De}{matrix of regression coefficients for the multinomial logit model on the class weights}
+\item{Piv}{matrix of the weights for every response configuration}
 \item{Pp}{matrix of the posterior probabilities for each response configuration and latent class}
 \item{lk}{log-likelhood at convergence of the EM algorithm}
 \item{np}{number of free parameters}
@@ -100,7 +107,8 @@ yv = out$freq
 multi1 = rbind(c(2,6,7,8,10,11,12),c(1,3,4,5,9,13,14))
 # Bidimensional LC Graded Response Model with 3 latent classes 
 # (free discriminating and free difficulty parameters)
-out1 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
+# less severe tollerance level to check convergence (to be modified)
+out1 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1,tol=5*10^-4)
 \dontrun{
 # Bidimensional LC Partial Credit Model with 3 latent classes 
 # (constrained discrimination and free difficulty parameters)
@@ -108,6 +116,25 @@ out2 = est_multi_poly(S,yv,k=3,start=0,link=2,multi=multi1)
 # Bidimensional LC Rating Scale Model with 3 latent classes 
 # (constrained discrimination and constrained difficulty parameters)
 out3 = est_multi_poly(S,yv,k=3,start=0,link=2,difl=1,multi=multi1)
+}
+
+\dontrun{
+## Estimation of LC model with covariates
+# gerate covariates
+be = c(0,1,-1)
+X = matrix(rnorm(2000),1000,2)
+u = cbind(1,X)%*%be
+p = exp(u)/(1+exp(u))
+c = 1+(runif(1000)<p)
+Y = matrix(0,1000,5)
+la = c(0.3,0.7)
+for(i in 1:1000) Y[i,] = runif(5)<la[c[i]]
+# fit the model with k=2 and k=3 classes
+out1 = est_multi_poly(Y,k=2,X=X)
+out2 = est_multi_poly(Y,k=3,X=X)
+# fit model with k=2 and k=3 classes in fortran
+out3 = est_multi_poly(Y,k=2,X=X,fort=TRUE)
+out4 = est_multi_poly(Y,k=3,X=X,fort=TRUE)
 }
 }
 

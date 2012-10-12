@@ -7,7 +7,7 @@ against a larger multidimensional model based on a higher number of dimensions. 
 typical example is testing a unidimensional model (and then the hypothesis of unidimensionality)
 against a bidimensional model. Both models are estimated by \code{est_multi_poly}.}
 
-\usage{test_dim(S, yv, k, link = 1, disc = 0, difl = 0, multi0 = 1:J, multi1)}
+\usage{test_dim(S, yv, k, link = 1, disc = 0, difl = 0, multi0 = 1:J, multi1, tol=10^-10)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,8 @@ against a bidimensional model. Both models are estimated by \code{est_multi_poly
   \item{difl}{indicator of constraints on the difficulty levels (0 = free, 1 = rating scale parametrization)}
   \item{multi0}{matrix specifying the multidimensional structure of the restricted model}
   \item{multi1}{matrix specifying the multidimensional structure of the larger model}
+  \item{tol}{tollerance level for checking convergence of the algorithm as relative difference between 
+  	         consecutive log-likelihoods}
 }
 
 %\details{
@@ -69,7 +71,8 @@ yv = out$freq
 multi1 = rbind(c(2,6,7,8,10,11,12),c(1,3,4,5,9,13,14))
 # Compare unidimensional vs bidimensional Graded Response models with free discrimination
 # and free difficulty parameters
-out = test_dim(S,yv,k=3,link=1,disc=1,multi1=multi1)
+# with less severe tollerance level (to be increased)
+out = test_dim(S,yv,k=3,link=1,disc=1,multi1=multi1,tol=5*10^-4)
 }
 
 %% Add one or more standard keywords, see file 'KEYWORDS' in the

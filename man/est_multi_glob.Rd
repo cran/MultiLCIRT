@@ -2,10 +2,10 @@
 \alias{est_multi_glob}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Fit marginal regression models for categorical responses}
-\description{It estimates marginal regression models to datasets consisting of a categorical response and 
-one or more covariates by a Fisher-scoring algorithm; this is an internal function.}
+\description{It estimates marginal regression models to datasets consisting of a categorical response and one or more covariates by a Fisher-scoring algorithm; this is an internal function.}
 
-\usage{est_multi_glob(yv, X, model, ind = rep(1, length(yv)), w = rep(1, length(yv)), be = NULL)}
+\usage{est_multi_glob(yv, X, model, ind = rep(1, length(yv)), w = rep(1, length(yv)), 
+	be = NULL)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
