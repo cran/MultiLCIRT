@@ -1,5 +1,5 @@
 est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
-                           multi=1:J,piv,Th,bec,gac,fort=FALSE,tol=10^-10){
+                           multi=1:J,piv,Phi,fort=FALSE,tol=10^-10){
 
 #        [piv,Th,Bec,gac,fv,Phi,Pp,lk,np,aic,bic] = est_multi_poly(S,yv,k,start,link,disc,difl,multi,piv,Th,bec,gac)
 #
@@ -28,6 +28,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	cat("*-------------------------------------------------------------------------------*\n")
 	if(k==1){
 	  cat("fit only for LC model with no other imput\n")
+	  link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
 	  X = NULL
 	}
 # Preliminaries
@@ -243,7 +244,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 				for(conf in 1:nconf){
 					j = conf1[conf]; h = conf2[conf]
 					ind = (S[,j]==h)
-					w[conf,] = colSums(V[ind,]*R[ind,j])
+					if(sum(ind)==1) w[conf,] = V[ind,]*R[ind,j] else w[conf,] = colSums(V[ind,]*R[ind,j])
 				}				
 			}else{
 				for(conf in 1:nconf){
@@ -289,7 +290,10 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
         if(cov){
             out = est_multilogit(V,XXdis,Xlabel,de,Pdis,fort=fort)
 			de = out$be; Pdis = out$Pdis; Piv = out$P
-        }else piv = sV/n
+        }else{
+            piv = sV/n
+            Piv = rep(1,ns)%o%piv
+       } 
 # Compute log-likelihood
 		Psi = matrix(1,ns,k);
 		if(miss){
@@ -347,6 +351,9 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
     Th = matrix(th,rm,k)
   }
   Pp = ((1./pm)%o%rep(1,k))*Piv*Psi
-  if(cov) De = matrix(de,ncov+1,k-1) else De = NULL
+  if(cov){
+      De = matrix(de,ncov+1,k-1)
+      piv = colMeans(Piv)
+  }else De = NULL
   out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,Pp=Pp,lk=lk,np=np,aic=aic,bic=bic)
 }

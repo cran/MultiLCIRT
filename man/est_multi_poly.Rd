@@ -10,7 +10,7 @@ class of subjects in the reference population. Maximum likelihood estimation is 
 Maximization algorithm.}
 
 \usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
-	difl = 0, multi = 1:J, piv, Th, bec, gac, fort = FALSE, tol = 10^-10)}
+	difl = 0, multi = 1:J, piv, Phi, fort = FALSE, tol = 10^-10)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -31,9 +31,7 @@ Maximization algorithm.}
   \item{multi}{matrix with a number of rows equal to the number of dimensions and elements in each row
                equal to the indices of the items measuring the dimension corresponding to that row}
   \item{piv}{initial value of the vector of weights of the latent classes (if start=2)}
-  \item{Th}{initial value of the matrix of the abilities (if start=2)}
-  \item{bec}{initial vector of difficulty parameters (if start=2)}
-  \item{gac}{initial vector of discriminant indices (if start=2)}
+  \item{Phi}{initial value of the matrix of the conditinal response probabilities (if start=2)}
   \item{fort}{to use fortran routines when possible}
   \item{tol}{tollerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
@@ -44,7 +42,7 @@ Maximization algorithm.}
 %}
 
 \value{
-\item{piv}{estimated vector of weights of the latent classes (if start=2)}
+\item{piv}{estimated vector of weights of the latent classes (average of the weights in case of model with covariates)}
 \item{Th}{estimated matrix of ability levels for each dimension and latent class}
 \item{Bec}{estimated vector of difficulty levels for every item (split in two vectors if difl=1)}
 \item{gac}{estimated vector of discriminating indices for every item}
@@ -55,8 +53,8 @@ Maximization algorithm.}
 \item{Pp}{matrix of the posterior probabilities for each response configuration and latent class}
 \item{lk}{log-likelhood at convergence of the EM algorithm}
 \item{np}{number of free parameters}
-\item{aic}{Akaike information Criterion index}
-\item{bic}{Bayesian information Criterion index}
+\item{aic}{Akaike Information Criterion index}
+\item{bic}{Bayesian Information Criterion index}
 }
 
 \references{
@@ -90,12 +88,14 @@ yv = out$freq
 # Define matrix to allocate each item to one dimension 
 multi1 = rbind(c(1,2,9,10),c(3,5,8,11),c(4,6,7,12))
 # Three-dimensional Rasch model with 3 latent classes
-out1 = est_multi_poly(S,yv,k=3,start=0,link=1,multi=multi1)
+# the tolerance level has been rise to increase the speed (to be reported to a smaller value)
+out1 = est_multi_poly(S,yv,k=3,start=0,link=1,multi=multi1,tol=10^-6)
 \dontrun{
 # Three-dimensional 2PL model with 3 latent classes
 out2 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
 }
 
+\dontrun{
 ## Estimation of different Multidimensional LC IRT models with ordinal responses
 # Aggregate data
 data(hads)
@@ -107,9 +107,7 @@ yv = out$freq
 multi1 = rbind(c(2,6,7,8,10,11,12),c(1,3,4,5,9,13,14))
 # Bidimensional LC Graded Response Model with 3 latent classes 
 # (free discriminating and free difficulty parameters)
-# less severe tollerance level to check convergence (to be modified)
-out1 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1,tol=5*10^-4)
-\dontrun{
+out1 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
 # Bidimensional LC Partial Credit Model with 3 latent classes 
 # (constrained discrimination and free difficulty parameters)
 out2 = est_multi_poly(S,yv,k=3,start=0,link=2,multi=multi1)

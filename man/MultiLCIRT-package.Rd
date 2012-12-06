@@ -20,8 +20,8 @@ individual covariates affecting the class weights.}
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 2.0\cr
-Date: \tab 2012-10-12\cr
+Version: \tab 2.1\cr
+Date: \tab 2012-12-06\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,
@@ -80,5 +80,6 @@ yv = out$freq
 # Define matrix to allocate each item on one dimension 
 multi1 = rbind(c(1,2,9,10),c(3,5,8,11),c(4,6,7,12))
 # Three-dimensional LC Rasch model with 4 latent classes
-out1 = est_multi_poly(S,yv,k=4,start=0,link=1,multi=multi1)
+# less severe tollerance level to check convergence (to be modified)
+out1 = est_multi_poly(S,yv,k=4,start=0,link=1,multi=multi1,tol=10^-6)
 }

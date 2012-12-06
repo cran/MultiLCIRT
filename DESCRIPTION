@@ -1,8 +1,8 @@
 Package: MultiLCIRT
 Type: Package
 Title: Multidimensional latent class Item Response Theory models
-Version: 2.0
-Date: 2012-10-12
+Version: 2.1
+Date: 2012-12-06
 Author: Francesco Bartolucci, Silvia Bacci, Michela Gnaldi - University
         of Perugia (IT)
 Maintainer: Francesco Bartolucci <bart@stat.unipg.it>
@@ -13,9 +13,9 @@ Description: This package provides a flexible framework for the Item
         for missing responses and for different item parameterizations
         and are based on the Expectation-Maximization paradigm.
         Individual covariates affecting the class weights may be
-        included in the new version (2.0).
+        included in the new version (2.1).
 License: GPL (>= 2)
 Depends: MASS
-Packaged: 2012-11-18 13:59:17 UTC; francescobartolucci
+Packaged: 2012-12-11 14:56:57 UTC; francescobartolucci
 Repository: CRAN
-Date/Publication: 2012-11-18 15:29:18
+Date/Publication: 2012-12-11 19:00:30

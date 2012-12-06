@@ -1,4 +1,4 @@
-aggr_data <- function(data){
+aggr_data <- function(data,disp=FALSE){
 
     # find distinct response configurations and corresponding frequencies
     # does not work properly with missing data
@@ -10,9 +10,11 @@ aggr_data <- function(data){
     label = rep(0,rim)
     j = 0
     label0 = 1:rim
-   	cat("------------|-------------|\n");
-   	cat("  remaining |   average   |\n")
-   	cat("------------|-------------|\n");
+    if(disp){
+        cat("------------|-------------|\n")
+   	    cat("  remaining |   average   |\n")
+   	    cat("------------|-------------|\n")
+   	}
     while(rim>0){
     	j = j+1
     	data_dis[j,] = data[1,]
@@ -24,9 +26,9 @@ aggr_data <- function(data){
 		label0 = label0[-ind]
 	    rim = length(label0)
 	    if(rim==1) data = t(data)
-	    cat(sprintf("%11g",c(rim,mean(freq[1:j]))),"\n",sep=" | ")    
+	    if(disp) cat(sprintf("%11g",c(rim,mean(freq[1:j]))),"\n",sep=" | ")    
     } 
-   	cat("------------|-------------|\n");
+   	if(disp) cat("------------|-------------|\n");
     data_dis = as.matrix(data_dis[1:j,])
     freq = freq[1:j]
     # output

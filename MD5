@@ -1,9 +1,9 @@
-e962317ad4cbba6c98c7e5afe591f595 *DESCRIPTION
+7e7ebed7732d738590e8434f22cafc18 *DESCRIPTION
 6c1eb095a558c46fddc8d586548117c1 *NAMESPACE
-15c22a02108e6172fb9cf2057c2acab1 *R/aggr_data.R
+91ece8f69cd48b153cba2a9813f78f7d *R/aggr_data.R
 73a5c055ec965e89324d584c147ef436 *R/class_item.R
 6d88a2b96fed57e574de12fc016eedef *R/est_multi_glob.R
-5acc37a31a48187d1f2d1bd04a3325f3 *R/est_multi_poly.R
+55e7a27421abb845f4e5e79199d26ca1 *R/est_multi_poly.R
 e6d9fd58cec1fff0bffcfbe58c7d34ee *R/est_multilogit.R
 451dddc0dd8eaaec30570f605d5cb31f *R/inv_glob.R
 9168174b91a17c716bad2288a3b2d0b9 *R/matr_glob.R
@@ -11,11 +11,11 @@ e6d9fd58cec1fff0bffcfbe58c7d34ee *R/est_multilogit.R
 71517422016a5534e37dffac2f1cb615 *R/test_dim.R
 39df0da65563e372beb4226d8fab9112 *data/hads.RData
 dcdf157e683ef55203d7db60e3ace100 *data/naep.RData
-7443cd0d271d9c5b84d03f20288029e7 *man/MultiLCIRT-package.Rd
-e6b073aa82e9f5f5131759701f7c8def *man/aggr_data.Rd
+b7813fbd9af01a9dc8c65c2e2d17ed8e *man/MultiLCIRT-package.Rd
+738f9446d2f12f3b0c79a1099e6f8a31 *man/aggr_data.Rd
 7fd77b6cb9efd19dda1a3b611ee3561c *man/class_item.Rd
 bcdeee4b833aeab48880c3e1d2ae7f3d *man/est_multi_glob.Rd
-2054dd2959d75a0ec66929505e07b27b *man/est_multi_poly.Rd
+88586c85ed53a395fc70d55e1200a4ec *man/est_multi_poly.Rd
 18c6d161968a4e97710f29041a541a4b *man/est_multilogit.Rd
 2422aa995bcc959383e3cf025c4fde5b *man/hads.Rd
 5f9662c9257c7a7e23960864758fc20c *man/inv_glob.Rd
