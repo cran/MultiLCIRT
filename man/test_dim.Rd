@@ -24,7 +24,7 @@ against a bidimensional model. Both models are estimated by \code{est_multi_poly
   \item{difl}{indicator of constraints on the difficulty levels (0 = free, 1 = rating scale parametrization)}
   \item{multi0}{matrix specifying the multidimensional structure of the restricted model}
   \item{multi1}{matrix specifying the multidimensional structure of the larger model}
-  \item{tol}{tollerance level for checking convergence of the algorithm as relative difference between 
+  \item{tol}{tolerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
 }
 

@@ -3,7 +3,7 @@
 \docType{data}
 \title{Dataset about measurement of anxiety and depression in oncological patients}
 
-\description{This data set contains the responses of 201 oncological patients to 14 ordinal polythomous items that measure
+\description{This data set contains the responses of 201 oncological patients to 14 ordinal polytomous items that measure
 anxiety (7 items) and depression (7 items), according to the Hospital Anxiety and Depression Scale questionnaire.
 }
 \usage{data(hads)}

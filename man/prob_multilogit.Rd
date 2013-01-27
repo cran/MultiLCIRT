@@ -2,7 +2,7 @@
 \alias{prob_multilogit}
 %- Also NEED an '\alias' for EACH other topic documented here.
 
-\title{Compute multinomial probabilties}
+\title{Compute multinomial probabilities}
 
 \description{The function compute multinomial probabilities (internal function).}
 

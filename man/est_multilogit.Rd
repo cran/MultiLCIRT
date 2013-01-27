@@ -6,7 +6,7 @@
 
 \description{The function performs maximum likelihood estimation of the multilogit model (internal function).}
 
-\usage{est_multilogit(Y, Xdis, label = 1:n, be = NULL, Pdis = NULL, dis = F, fort = F)}
+\usage{est_multilogit(Y, Xdis, label = 1:n, be = NULL, Pdis = NULL, dis = F, fort = F, ex = F)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -15,8 +15,10 @@
   \item{label}{label associated to every covariate configuration}
   \item{be}{initial value of the parameter vector}
   \item{Pdis}{probability configurations as initial values}
-  \item{dis}{to dispaly partial results}
+  \item{dis}{to display partial results}
   \item{fort}{to use fortran routines when possible}
+  \item{ex}{TRUE if the function exits without running the estimation algorithm providing
+  	        the score vector and the information matrix}
 }
 
 %\details{
@@ -27,6 +29,8 @@
 \item{be}{estimated vector regression coefficients}
 \item{P}{estimated matrix of probabilities}
 \item{Pdis}{estimated matrix of distinct probabilities}
+\item{sc}{score vector}
+\item{Fi}{information matrix}
 }
 
 \author{Francesco Bartolucci - University of Perugia (IT)}

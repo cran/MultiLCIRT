@@ -1,8 +1,9 @@
-est_multilogit <- function(Y,Xdis,label=1:n,be=NULL,Pdis=NULL,dis=F,fort=F){
+est_multilogit <- function(Y,Xdis,label=1:n,be=NULL,Pdis=NULL,dis=F,fort=F,ex=F){
 		
 # fit multinomial logit model for reponses included in Y
 # covariates in matrix X (two formats are allows for X: with binary responses it is n x ncov, with more response categories it is ncat x ncov x ndis)
 # label, in case of redundacies are the labels say to which design matrix in Xdis each row of Y is referred		
+# ex = TRUE if exit after only computing score and information		
 		
 time = proc.time()
 # preliminaries
@@ -54,15 +55,17 @@ time = proc.time()
             sc=rep(0,nbe),Fi=matrix(0,nbe,nbe))
             sc = out$sc; Fi = out$Fi
         }
-    	dbe = ginv(Fi)%*%sc
-	    mdbe = max(abs(dbe))
-	    if(mdbe>0.5) dbe = dbe/mdbe*0.5
-	    be = be+as.vector(dbe)
+        if(ex==FALSE){
+        	dbe = ginv(Fi)%*%sc
+	        mdbe = max(abs(dbe))
+	        if(mdbe>0.5) dbe = dbe/mdbe*0.5
+	        be = be+as.vector(dbe)
+	    }
 # compute again probabilities
-	    out = prob_multilogit(Xdis,be,label,fort)
-	    P = out$P; Pdis = out$Pdis
-        lk = sum(Ydis*log(Pdis))
-        if(dis) print(c(it,lk,lk-lko))
+	        out = prob_multilogit(Xdis,be,label,fort)
+	        P = out$P; Pdis = out$Pdis
+            lk = sum(Ydis*log(Pdis))
+            if(dis) print(c(it,lk,lk-lko))
 	}
-	out = list(be=be,P=P,Pdis=Pdis)
+	out = list(be=be,P=P,Pdis=Pdis,sc=sc,Fi=Fi)
 }

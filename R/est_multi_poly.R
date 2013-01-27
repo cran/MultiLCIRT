@@ -1,5 +1,5 @@
 est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
-                           multi=1:J,piv,Phi,fort=FALSE,tol=10^-10){
+                           multi=1:J,piv=NULL,Phi=NULL,gac=NULL,De=NULL,fort=FALSE,tol=10^-10){
 
 #        [piv,Th,Bec,gac,fv,Phi,Pp,lk,np,aic,bic] = est_multi_poly(S,yv,k,start,link,disc,difl,multi,piv,Th,bec,gac)
 #
@@ -30,6 +30,10 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	  cat("fit only for LC model with no other imput\n")
 	  link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
 	  X = NULL
+	}
+	if(max(S,na.rm=TRUE)==1){
+	  cat("with binary data put difl=0\n")
+	  difl = 0		
 	}
 # Preliminaries
 # check problems with standard errors
@@ -68,15 +72,15 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	if(link == 1 || link == 2){
 		if(is.vector(multi)) rm = 1
 		else rm = nrow(multi)
-		De = matrix(0,J,rm)
+		De1 = matrix(0,J,rm)
 		if(rm==1){
-			De = 1
+			De1 = 1
 			fv = multi[1]
 		}else{
 			for(r in 1:rm){
 				ind = multi[r,]
 				ind = ind[ind>0]
-				De[ind,r] = 1      
+				De1[ind,r] = 1      
 			}
 			fv = multi[,1]     # list of constrained items
 		}
@@ -185,14 +189,25 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 		}
 		Phi = array(runif(l*J*k),c(l,J,k))
 		for(c in 1:k) for(j in 1:J) Phi[,j,c] = Phi[,j,c]/sum(Phi[,j,c]);
-	}  
-	if(link==0) ga = NULL else if(link==1 || link==2) ga = rep(1,J-rm)
+	}
+	if(start==2) de = as.vector(De)  
+	if(link==0){
+		ga = NULL
+	}else{
+		if (start==0 || start==1) ga = rep(1,J-rm)
+		else ga = gac[-fv]
+	}
 # Compute log-likelihood
 	Psi = matrix(1,ns,k) # probability observed response
 	if(miss){
 		for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*(Phi[S[,j]+1,j,c]*R[,j]+(1-R[,j]))
 	}else{
-		for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*Phi[S[,j]+1,j,c]
+    	if(fort){
+            o = .Fortran("lk_obs",J,as.integer(k),as.integer(ns),as.integer(S),as.integer(l),Phi,Psi=Psi)
+            Psi = o$Psi
+        }else{
+    	    for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*Phi[S[,j]+1,j,c]
+        }            	
 	}
 	if(cov){
 	    Piv = matrix(0,ns,k)
@@ -207,6 +222,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	cat(c("Model of type =                ",link,"\n"))
 	cat(c("Discrimination index =         ",disc,"\n"))
 	cat(c("Constraints on the difficulty =",difl,"\n"))
+	cat(c("Type of initialization =       ",start,"\n"))	
 	if(disc==0 || length(ga)==0){
     	cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
     	cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
@@ -221,10 +237,12 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
  	it = 0; lko = lk-10^10; dis = 0; par = 0; dga = NULL
 # Iterate until convergence
 	while(((abs(lk-lko)/abs(lko)>tol) && it<10^4) || it<2){
+#t0 = proc.time()
 		it = it+1
 		paro = par; gao = ga; pivo = piv; deo = de; lko = lk
 # ---- E-step ----
 		V = ((yv/pm)%o%rep(1,k))*Piv*Psi; sV = colSums(V)
+#print(proc.time()-t0)
 # ---- M-step ----
 		if(link==0){  # LC model
 			if(miss){
@@ -246,12 +264,20 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 					ind = (S[,j]==h)
 					if(sum(ind)==1) w[conf,] = V[ind,]*R[ind,j] else w[conf,] = colSums(V[ind,]*R[ind,j])
 				}				
+		    	YY = t(matrix(as.vector(w),2,J*k))
 			}else{
-				for(conf in 1:nconf){
-					j = conf1[conf]; h = conf2[conf]
-					w[conf,] = colSums(V[S[,j]==h,])
+				if(it>1 & l==2 & fort){
+    	            o = .Fortran("matr_YY",as.integer(J),as.integer(k),as.integer(ns),as.integer(S),V,YY=matrix(0,J*k,2))
+    	            YY = o$YY
+    			}else{
+     				for(conf in 1:nconf){
+	    				j = conf1[conf]; h = conf2[conf]
+		    			w[conf,] = colSums(V[S[,j]==h,])
+			    	}
+			    	YY = t(matrix(as.vector(w),2,J*k))
 				}
 			}
+#print(proc.time()-t0)			
 			if(disc==1){
 				if(it>1 & rm<J){
 					ZZ1 = array(0,c(l-1,J,J*k))
@@ -263,13 +289,23 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 					dimz = dim(ZZ1)
 					dimz[2] = dimz[2]-length(fv)
 					ZZ1 = array(ZZ1[,-fv,],dimz)
-					ga = est_multi_glob(confe2,ZZ1,ltype,confe1,as.vector(w),ga)$be
+#print(proc.time()-t0)			
+					if(l==2){
+                        ga = est_multilogit(YY,t(ZZ1[1,,]),fort=fort,be=ga,Pdis=P)$be
+					}else{
+	    				ga = est_multi_glob(confe2,ZZ1,ltype,confe1,as.vector(w),ga)$be
+					}
 				}
+#print(proc.time()-t0)			
 				gac = rep(1,J); gac[indga] = ga
-				ZZ = ZZ0
-				for(j in 1:J){
-					ind = (refitem==j)
-					ZZ[,,ind] = ZZ[,,ind]*gac[j]
+ 	            if(it>1 & l==2){
+                	ZZ = diag(rep(1,k)%x%gac)%*%t(ZZ0[1,,])
+                }else{
+    				ZZ = ZZ0
+	    			for(j in 1:J){
+		    			ind = (refitem==j)
+			    		ZZ[,,ind] = ZZ[,,ind]*gac[j]
+				    }
 				}
 			}
 #			print(length(confe2))
@@ -281,12 +317,19 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 #			print(dim(w))
 #			print(w)
 #			return
-			if(it==1) out = est_multi_glob(confe2,ZZ,ltype,confe1,as.vector(w))   # update par
-			else out = est_multi_glob(confe2,ZZ,ltype,confe1,as.vector(w),par)
-			par = out$be; lkc = out$lk; P = out$P
+#t1 = proc.time()-t0
+            if(it>1 & l==2){
+                out = est_multilogit(YY,ZZ,fort=fort,be=par,Pdis=P)
+		    	par = out$be; P = out$P
+            }else{
+    			if(it==1) out = est_multi_glob(confe2,ZZ,ltype,confe1,as.vector(w))   # update par
+	    		else out = est_multi_glob(confe2,ZZ,ltype,confe1,as.vector(w),par)
+		    	par = out$be; P = out$P
+		    }		
 			Phi = array(t(P),c(l,J,k))
     		}
 # Update piv
+#print(proc.time()-t0)
         if(cov){
             out = est_multilogit(V,XXdis,Xlabel,de,Pdis,fort=fort)
 			de = out$be; Pdis = out$Pdis; Piv = out$P
@@ -294,12 +337,18 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
             piv = sV/n
             Piv = rep(1,ns)%o%piv
        } 
+#print(proc.time()-t0)
 # Compute log-likelihood
 		Psi = matrix(1,ns,k);
 		if(miss){
 			for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*(Phi[S[,j]+1,j,c]*R[,j]+(1-R[,j]))	
 		}else{
-			for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*Phi[S[,j]+1,j,c]
+			if(fort){
+                o = .Fortran("lk_obs",J,as.integer(k),as.integer(ns),as.integer(S),as.integer(l),Phi,Psi=Psi)
+                Psi = o$Psi
+            }else{
+    			for(j in 1:J) for(c in 1:k)	Psi[,c] = Psi[,c]*Phi[S[,j]+1,j,c]
+    		}            	
 		}
 		if(k==1) Pj=Psi else Pj = Psi*Piv
         pm = rowSums(Pj)
@@ -309,6 +358,8 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 			if(disc==0 || length(ga)==0) cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ") else{
 				if(disc==1) cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
 			}
+#t2 = proc.time()-t0
+#print(c(t1[1],t2[1]))
 		}
 	}
 	if(it/10>floor(it/10)){

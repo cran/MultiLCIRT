@@ -2,7 +2,7 @@
 \alias{est_multi_poly}
 %- Also NEED an '\alias' for EACH other topic documented here.
 
-\title{Estimate multidimensional LC IRT model for dichotomous and polythomous responses}
+\title{Estimate multidimensional LC IRT model for dichotomous and polytomous responses}
 
 \description{The function performs maximum likelihood estimation of the parameters of the IRT models
 assuming a discrete distribution for the ability. Every ability level corresponds to a latent
@@ -10,7 +10,7 @@ class of subjects in the reference population. Maximum likelihood estimation is 
 Maximization algorithm.}
 
 \usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
-	difl = 0, multi = 1:J, piv, Phi, fort = FALSE, tol = 10^-10)}
+	difl = 0, multi = 1:J, piv=NULL, Phi=NULL, gac=NULL, De=NULL, fort = FALSE, tol = 10^-10)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -31,9 +31,11 @@ Maximization algorithm.}
   \item{multi}{matrix with a number of rows equal to the number of dimensions and elements in each row
                equal to the indices of the items measuring the dimension corresponding to that row}
   \item{piv}{initial value of the vector of weights of the latent classes (if start=2)}
-  \item{Phi}{initial value of the matrix of the conditinal response probabilities (if start=2)}
+  \item{Phi}{initial value of the matrix of the conditional response probabilities (if start=2)}
+  \item{gac}{initial value of the complete vector of discriminating indices (if start=2)}
+  \item{De}{initial value of regression coefficients for the covariates (if start=2)}
   \item{fort}{to use fortran routines when possible}
-  \item{tol}{tollerance level for checking convergence of the algorithm as relative difference between 
+  \item{tol}{tolerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
 }
 
