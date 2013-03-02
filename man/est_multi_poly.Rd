@@ -10,7 +10,8 @@ class of subjects in the reference population. Maximum likelihood estimation is 
 Maximization algorithm.}
 
 \usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
-	difl = 0, multi = 1:J, piv=NULL, Phi=NULL, gac=NULL, De=NULL, fort = FALSE, tol = 10^-10)}
+		difl = 0, multi = 1:J, piv = NULL, Phi = NULL, gac = NULL, De = NULL, 
+		fort = FALSE, tol = 10^-10, disp = FALSE, output = FALSE)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -37,6 +38,8 @@ Maximization algorithm.}
   \item{fort}{to use fortran routines when possible}
   \item{tol}{tolerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
+  \item{disp}{to display the likelihood evolution step by step}
+  \item{output}{to return additional outputs (Phi,Pp,Piv)}
 }
 
 %\details{
@@ -47,7 +50,8 @@ Maximization algorithm.}
 \item{piv}{estimated vector of weights of the latent classes (average of the weights in case of model with covariates)}
 \item{Th}{estimated matrix of ability levels for each dimension and latent class}
 \item{Bec}{estimated vector of difficulty levels for every item (split in two vectors if difl=1)}
-\item{gac}{estimated vector of discriminating indices for every item}
+\item{gac}{estimated vector of discriminating indices for every item (with all elements equal to 1
+	       with Rasch parametrization)}
 \item{fv}{vector indicating the reference item chosen for each latent dimension}
 \item{Phi}{array of the conditional response probabilities for every item and latent class}
 \item{De}{matrix of regression coefficients for the multinomial logit model on the class weights}

@@ -1,10 +1,12 @@
-class_item <- function(S,yv,k,link=1,disc=0,difl=0){
+class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
 	
+	# print warnign
+	cat("\n * Warning: this function can take a long execution time *\n\n")
 	# preliminaries
 	r = dim(S)[2]
 	multi0 = matrix(1:r,r,1)
 	label0 = -(1:r)
-	out0 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi0)
+	out0 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi0,fort=fort,disp=disp)
 	lk0 = out0$lk
 	lk = NULL; np = NULL; merge = NULL
 	# try to join two clusters
@@ -24,7 +26,7 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0){
 			ind = which(colSums(multi1)==0)
 			if(length(ind)>0) multi1 = multi1[,-ind]
 			label1 = c(label0[-c(j1,j2)],g) 
-			out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1)
+			out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1,fort=fort,disp=disp)
 			if(out1$lk>bestlk){
 				bestj1 = j1; bestj2 = j2
 				bestlk = out1$lk; bestnp = out1$np; bestmulti1 = multi1; bestlabel1 = label1
@@ -37,7 +39,7 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0){
 	}
 	g = g+1
 	multi1 = 1:r
-	out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1)
+	out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1,fort=fort,disp=disp)
 	lk = c(lk,out1$lk); np = c(np,out1$np); multi0 = multi1
 	merge = rbind(merge,c(label0[1],label0[2])) 
 	
@@ -56,5 +58,15 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0){
 	}
 
 	# output
-	out = list(merge=merge,order=groups[[r-1]],height=-2*(lk-lk0),lk=lk,np=np,groups=groups)
+	height=-2*(lk-lk0)
+	lg = rep(0,r-1); for(j in 1:(r-1)) lg[j] = length(groups[[j]])
+	table = cbind(merge,height,matrix(0,r-1,max(lg)))
+	for(i in 1:(r-1)) table[i,4:(3+lg[i])] = sort(groups[[i]])
+	colnames(table)[1:4] = c("items","","deviance","newgroup")
+	names = NULL; for(i in 1:(r-1)) names = c(names,paste("Step",i))
+	rownames(table) = names
+	table[,3] = round(table[,3],3)
+	dend = list(merge=merge,order=groups[[r-1]],height=-2*(lk-lk0))
+	class(dend) = "hclust"
+	out = list(merge=merge,height=height,lk=lk,np=np,groups=groups,table=table,dend=dend)
 }

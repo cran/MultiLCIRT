@@ -5,21 +5,23 @@
 \description{It performs a hierarchical classification of a set of test items on the basis of 
 the responses provided by a sample of subjects. The classification is based on a
 sequence of likelihood ratio tests between pairs of multidimensional models suitably formulated.}
-\usage{class_item(S, yv, k, link = 1, disc = 0, difl = 0)}
+\usage{class_item(S, yv, k, link = 1, disc = 0, difl = 0, fort = FALSE, disp = FALSE)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{S}{matrix of all response sequences observed at least once in the sample and listed row-by-row
-         (use 999 for missing response)}
-\item{yv}{vector of the frequencies of every response configuration in \code{S}}
-\item{k}{number of ability levels (or latent classes)}
-\item{link}{type of link function (1 = global logits, 2 = local logits);
-            with global logits the Graded Response model
-            results; with local logits the  Partial Credit results (with dichotomous responses, global logits
-            is the same as using local logits resulting in the Rasch or the 2PL model depending on the value
-            assigned to disc)}
-\item{disc}{indicator of constraints on the discriminating indices (0 = all equal to one, 1 = free)}
-\item{difl}{indicator of constraints on the difficulty levels (0 = free, 1 = rating scale parametrization)}
+  \item{S}{matrix of all response sequences observed at least once in the sample and listed row-by-row
+           (use 999 for missing response)}
+  \item{yv}{vector of the frequencies of every response configuration in \code{S}}
+  \item{k}{number of ability levels (or latent classes)}
+  \item{link}{type of link function (1 = global logits, 2 = local logits);
+              with global logits the Graded Response model
+              results; with local logits the  Partial Credit results (with dichotomous responses, global logits
+              is the same as using local logits resulting in the Rasch or the 2PL model depending on the value
+              assigned to disc)}
+  \item{disc}{indicator of constraints on the discriminating indices (0 = all equal to one, 1 = free)}
+  \item{difl}{indicator of constraints on the difficulty levels (0 = free, 1 = rating scale parametrization)}
+  \item{fort}{to use fortran routines when possible}
+  \item{disp}{to display the likelihood evolution step by step}
 }
 
 %\details{
@@ -33,6 +35,8 @@ sequence of likelihood ratio tests between pairs of multidimensional models suit
 \item{lk}{maximum log-likelihood of the model resulting from each aggregation}
 \item{np}{number of free parameters of the model resulting from each aggregation}
 \item{groups}{list of groups resulting (step-by-step) from the hierarchical clustering}
+\item{table}{matrix summarizing the final results}
+\item{dend}{hclust object to represent the histogram}
 }
 
 \references{
@@ -83,8 +87,7 @@ yv = out$freq
 # Create dendrogram for items classification, by assuming k=3 latent classes
 # and a Rasch parameterization
 out = class_item(S,yv,k=3,link=1)
-class(out) = "hclust"
-plot(out)
+plot(out$dend)
 }
 
 \dontrun{
@@ -98,8 +101,7 @@ yv = out$freq
 # Create dendrogram for items classification, by assuming k=4 latent classes
 # and a Rasch parameterization
 out = class_item(S,yv,k=4,link=1)   
-class(out) = "hclust"
-plot(out)
+plot(out$dend)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

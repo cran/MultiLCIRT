@@ -74,7 +74,7 @@ est_multi_glob<-function(yv,X,model,ind=rep(1,length(yv)),w=rep(1,length(yv)),be
       		FI = FI+sum(w[indh])*(D%*%(diag(p)-p%*%t(p))%*%t(D))
 		}
 		if(rcond(FI)<10^-15){
-			cat("matrix close to singularity in est_multi_glog\n")
+			cat("matrix close to singularity in est_multi_glob\n")
 			dbe = ginv(FI)%*%s
 			}else dbe = solve(FI)%*%s
 		mdbe = max(abs(dbe))

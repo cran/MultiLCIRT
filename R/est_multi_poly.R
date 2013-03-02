@@ -1,5 +1,6 @@
 est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
-                           multi=1:J,piv=NULL,Phi=NULL,gac=NULL,De=NULL,fort=FALSE,tol=10^-10){
+                           multi=1:J,piv=NULL,Phi=NULL,gac=NULL,De=NULL,fort=FALSE,tol=10^-10,
+                           disp=FALSE,output=FALSE){
 
 #        [piv,Th,Bec,gac,fv,Phi,Pp,lk,np,aic,bic] = est_multi_poly(S,yv,k,start,link,disc,difl,multi,piv,Th,bec,gac)
 #
@@ -23,6 +24,8 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 # fv   : list of items constrained
 # fort : T for using fortran code for covariates, F using R code only
 # tol  : relative tolerance level for convergence
+# disp : TRUE for displying the likelihood evolution step by step
+# outputs : to return additional outputs (Phi,Pp,Piv)
 
 # With k=1
 	cat("*-------------------------------------------------------------------------------*\n")
@@ -31,7 +34,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	  link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
 	  X = NULL
 	}
-	if(max(S,na.rm=TRUE)==1){
+	if(max(S,na.rm=TRUE)==1 & difl!=0){
 	  cat("with binary data put difl=0\n")
 	  difl = 0		
 	}
@@ -217,23 +220,33 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	if(k==1) Pj=Psi else Pj = Psi*Piv
 	pm = rowSums(Pj)
 	lk = sum(yv*log(pm))
-	cat(c("Model with multdimensional structure\n"))
-	print(multi)
-	cat(c("Model of type =                ",link,"\n"))
+	if(link==1 || link==2){
+		cat(c("Model with multdimensional structure\n"))
+		names = NULL
+		for(j in 1:rm){names = c(names,paste("Dimension",j))}
+		multi_out = as.matrix(multi)
+		if(rm == 1) multi_out = t(multi_out)
+		rownames(multi_out) = names
+		print(multi_out)
+	}
+	cat(c("Link of type =                 ",link,"\n"))
 	cat(c("Discrimination index =         ",disc,"\n"))
 	cat(c("Constraints on the difficulty =",difl,"\n"))
-	cat(c("Type of initialization =       ",start,"\n"))	
-	if(disc==0 || length(ga)==0){
-    	cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-    	cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
-    	cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-	}else if(disc==1){
-		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-		cat("  iteration |   classes   |    model    |    lk       |    lk-lko   |      dis    |   min(ga)   |   max(ga)   |   min(par)  |   max(par)  |\n");
-		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+	cat(c("Type of initialization =       ",start,"\n"))
+	cat("*-------------------------------------------------------------------------------*\n")		
+	if(disp){
+		if(disc==0 || length(ga)==0){
+    		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+    		cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
+    		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+		}else if(disc==1){
+			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+			cat("  iteration |   classes   |    model    |    lk       |    lk-lko   |      dis    |   min(ga)   |   max(ga)   |   min(par)  |   max(par)  |\n");
+			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
 
+		}
+		cat(sprintf("%11g",c(0,k,link,lk)),"\n",sep=" | ")
 	}
-	cat(sprintf("%11g",c(0,k,link,lk)),"\n",sep=" | ")
  	it = 0; lko = lk-10^10; dis = 0; par = 0; dga = NULL
 # Iterate until convergence
 	while(((abs(lk-lko)/abs(lko)>tol) && it<10^4) || it<2){
@@ -354,21 +367,25 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
         pm = rowSums(Pj)
 	    lk = sum(yv*log(pm))
 		dis = max(c(abs(par-paro),abs(ga-gao),abs(piv-pivo)))
-		if(it/10==floor(it/10)){
-			if(disc==0 || length(ga)==0) cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ") else{
+		if(disp){
+			if(it/10==floor(it/10)){
+				if(disc==0 || length(ga)==0) cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ") else{
 				if(disc==1) cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
-			}
+				}
 #t2 = proc.time()-t0
 #print(c(t1[1],t2[1]))
+			}
 		}
 	}
-	if(it/10>floor(it/10)){
-		if(disc==0 || length(ga)==0){
-			cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ")
-		    	cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-		}else if(disc==1){
-			cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
-			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+	if(disp){
+		if(it/10>floor(it/10)){
+			if(disc==0 || length(ga)==0){
+				cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ")
+		    		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+			}else if(disc==1){
+				cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
+				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+			}
 		}
 	}
 # Compute number of parameters  
@@ -400,11 +417,19 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
     }
     gac = rep(1,J); gac[indga] = ga
     Th = matrix(th,rm,k)
+    names2 = NULL
+    for(c in 1:k){names2 = c(names2,paste("Class",c))}
+    rownames(Th) = names
+    colnames(Th) = names2
   }
   Pp = ((1./pm)%o%rep(1,k))*Piv*Psi
   if(cov){
       De = matrix(de,ncov+1,k-1)
       piv = colMeans(Piv)
   }else De = NULL
-  out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,Pp=Pp,lk=lk,np=np,aic=aic,bic=bic)
+  if(output){
+    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,Pp=Pp,lk=lk,np=np,aic=aic,bic=bic)
+  }else{
+    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,De=De,lk=lk,np=np,aic=aic,bic=bic)
+  }
 }

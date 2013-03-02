@@ -7,7 +7,8 @@ against a larger multidimensional model based on a higher number of dimensions. 
 typical example is testing a unidimensional model (and then the hypothesis of unidimensionality)
 against a bidimensional model. Both models are estimated by \code{est_multi_poly}.}
 
-\usage{test_dim(S, yv, k, link = 1, disc = 0, difl = 0, multi0 = 1:J, multi1, tol=10^-10)}
+\usage{test_dim(S, yv, k, link = 1, disc = 0, difl = 0, multi0 = 1:J, multi1, tol = 10^-10,
+	            disp = FALSE)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +27,7 @@ against a bidimensional model. Both models are estimated by \code{est_multi_poly
   \item{multi1}{matrix specifying the multidimensional structure of the larger model}
   \item{tol}{tolerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
+  \item{disp}{to display intermediate output}
 }
 
 %\details{
@@ -38,6 +40,7 @@ against a bidimensional model. Both models are estimated by \code{est_multi_poly
 \item{dev}{likelihood ratio statistic}
 \item{df}{number of degrees of freedom of the test}
 \item{pv}{\emph{p}-value for the test}
+\item{table}{summary of all the results}
 }
 
 \references{

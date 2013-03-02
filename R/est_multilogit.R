@@ -56,7 +56,7 @@ time = proc.time()
             sc = out$sc; Fi = out$Fi
         }
         if(ex==FALSE){
-        	dbe = ginv(Fi)%*%sc
+            if(rcond(Fi)>10^-15) dbe = solve(Fi)%*%sc else dbe = ginv(Fi)%*%sc
 	        mdbe = max(abs(dbe))
 	        if(mdbe>0.5) dbe = dbe/mdbe*0.5
 	        be = be+as.vector(dbe)
