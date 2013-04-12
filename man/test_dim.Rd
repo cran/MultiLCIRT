@@ -35,12 +35,12 @@ against a bidimensional model. Both models are estimated by \code{est_multi_poly
 %}
 
 \value{
-\item{out0}{output for the restricted model obtained from \code{est_multi_poly}}
-\item{out1}{output for the larger model obtained from \code{est_multi_poly}}
-\item{dev}{likelihood ratio statistic}
-\item{df}{number of degrees of freedom of the test}
-\item{pv}{\emph{p}-value for the test}
-\item{table}{summary of all the results}
+	\item{out0}{output for the restricted model obtained from \code{est_multi_poly}}
+	\item{out1}{output for the larger model obtained from \code{est_multi_poly}}
+	\item{dev}{likelihood ratio statistic}
+	\item{df}{number of degrees of freedom of the test}
+	\item{pv}{\emph{p}-value for the test}
+	\item{call}{command used to call the function}  
 }
 
 \references{

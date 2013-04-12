@@ -20,8 +20,8 @@ individual covariates affecting the class weights.}
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 2.3\cr
-Date: \tab 2013-03-02\cr
+Version: \tab 2.4\cr
+Date: \tab 2013-04-12\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,

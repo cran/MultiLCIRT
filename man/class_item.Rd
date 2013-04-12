@@ -30,13 +30,14 @@ sequence of likelihood ratio tests between pairs of multidimensional models suit
 
 \value{
 \item{merge}{input for the dendrogram represented by the \code{R} function \code{plot}}
-\item{order}{input for the dendrogram represented by the \code{R} function \code{plot}}
 \item{height}{input for the dendrogram represented by the \code{R} function \code{plot}}
 \item{lk}{maximum log-likelihood of the model resulting from each aggregation}
 \item{np}{number of free parameters of the model resulting from each aggregation}
+\item{lk0}{maximum log-likelihood of the latent class model}
+\item{np0}{number of free parameters of the latent class model}
 \item{groups}{list of groups resulting (step-by-step) from the hierarchical clustering}
-\item{table}{matrix summarizing the final results}
 \item{dend}{hclust object to represent the histogram}
+\item{call}{command used to call the function}
 }
 
 \references{
@@ -87,6 +88,7 @@ yv = out$freq
 # Create dendrogram for items classification, by assuming k=3 latent classes
 # and a Rasch parameterization
 out = class_item(S,yv,k=3,link=1)
+summary(out)
 plot(out$dend)
 }
 
@@ -101,6 +103,7 @@ yv = out$freq
 # Create dendrogram for items classification, by assuming k=4 latent classes
 # and a Rasch parameterization
 out = class_item(S,yv,k=4,link=1)   
+summary(out)
 plot(out$dend)
 }
 }

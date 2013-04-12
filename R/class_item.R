@@ -7,7 +7,7 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
 	multi0 = matrix(1:r,r,1)
 	label0 = -(1:r)
 	out0 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi0,fort=fort,disp=disp)
-	lk0 = out0$lk
+	lk0 = out0$lk; np0 = out0$np
 	lk = NULL; np = NULL; merge = NULL
 	# try to join two clusters
 	rmulti0 = nrow(multi0); g = 0
@@ -59,14 +59,11 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
 
 	# output
 	height=-2*(lk-lk0)
-	lg = rep(0,r-1); for(j in 1:(r-1)) lg[j] = length(groups[[j]])
-	table = cbind(merge,height,matrix(0,r-1,max(lg)))
-	for(i in 1:(r-1)) table[i,4:(3+lg[i])] = sort(groups[[i]])
-	colnames(table)[1:4] = c("items","","deviance","newgroup")
-	names = NULL; for(i in 1:(r-1)) names = c(names,paste("Step",i))
-	rownames(table) = names
-	table[,3] = round(table[,3],3)
 	dend = list(merge=merge,order=groups[[r-1]],height=-2*(lk-lk0))
 	class(dend) = "hclust"
-	out = list(merge=merge,height=height,lk=lk,np=np,groups=groups,table=table,dend=dend)
+	out = list(merge=merge,height=height,lk=lk,np=np,lk0=lk0,np0=np0,
+	           groups=groups,dend=dend,call = match.call())
+	class(out) = "class_item"
+	out
+    
 }
