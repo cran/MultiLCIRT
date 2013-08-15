@@ -6,12 +6,13 @@
 	function finds the corresponding matrix of distinct configurations and the corresponding 
 	vector of frequencies (it does not work properly with missing data).}
 \usage{
-aggr_data(data, disp=FALSE)
+aggr_data(data, disp=FALSE, fort=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{data}{matrix of covariate and unit-by-unit response configurations}
   \item{disp}{to display partial results}
+  \item{fort}{to use fortran routines when possible}
 }
 
 %\details{

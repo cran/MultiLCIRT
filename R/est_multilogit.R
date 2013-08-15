@@ -57,15 +57,23 @@ time = proc.time()
         }
         if(ex==FALSE){
             if(rcond(Fi)>10^-15) dbe = solve(Fi)%*%sc else dbe = ginv(Fi)%*%sc
+	        dbe = as.vector(dbe)
 	        mdbe = max(abs(dbe))
 	        if(mdbe>0.5) dbe = dbe/mdbe*0.5
-	        be = be+as.vector(dbe)
+	        mpre = -Inf; for(i in 1:ndis) mpre = max(c(mpre,Xdis[,,i]%*%(be+dbe)))
+	        while(mpre>500){
+	        	dbe = dbe/2	
+		        mpre = -Inf; for(i in 1:ndis) mpre = max(c(mpre,Xdis[,,i]%*%(be+dbe)))
+	        }
+	        be = be+dbe
 	    }
 # compute again probabilities
 	        out = prob_multilogit(Xdis,be,label,fort)
 	        P = out$P; Pdis = out$Pdis
             lk = sum(Ydis*log(Pdis))
             if(dis) print(c(it,lk,lk-lko))
+#            print(lk)
+#            if(is.nan(lk)) browser()
 	}
 	out = list(be=be,P=P,Pdis=Pdis,sc=sc,Fi=Fi)
 }

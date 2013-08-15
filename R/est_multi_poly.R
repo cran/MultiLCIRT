@@ -64,7 +64,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 # checks about the covariates
     if(cov){
     	ncov = ncol(X)
-    	out = aggr_data(X)
+    	out = aggr_data(X,fort=fort)
     	Xdis = out$data_dis; Xlabel = out$label; Xndis = max(out$label)
     	XXdis = array(0,c(k,(k-1)*(ncov+1),Xndis))
     	if(k==2) II = as.matrix(c(0,1)) else {II = diag(k); II = II[,-1]}
@@ -184,7 +184,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	}
 	if(start == 1){
 		if(cov){
-			de = rnorm((k-1)*(ncov+1))/5
+			de = rnorm((k-1)*(ncov+1))/rep(c(1,apply(X,2,sd)),(k-1))
 			piv = NULL
 		}else{
 			piv = runif(k)
@@ -247,7 +247,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 		}
 		cat(sprintf("%11g",c(0,k,link,lk)),"\n",sep=" | ")
 	}
- 	it = 0; lko = lk-10^10; dis = 0; par = 0; dga = NULL
+ 	it = 0; lko = lk-10^10; dis = 0; par = 0; dga = NULL; lkv = NULL
 # Iterate until convergence
 	while(((abs(lk-lko)/abs(lko)>tol) && it<10^4) || it<2){
 #t0 = proc.time()
@@ -376,16 +376,20 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 #print(c(t1[1],t2[1]))
 			}
 		}
+		lkv = c(lkv,lk)
 	}
 	if(disp){
 		if(it/10>floor(it/10)){
 			if(disc==0 || length(ga)==0){
 				cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ")
-		    		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
 			}else if(disc==1){
 				cat(sprintf("%11g",c(it,k,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
-				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
 			}
+		}
+		if(disc==0 || length(ga)==0){
+	   		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+		}else if(disc==1){
+			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
 		}
 	}
 # Compute number of parameters  
@@ -427,9 +431,15 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
       De = matrix(de,ncov+1,k-1)
       piv = colMeans(Piv)
   }else De = NULL
+  dimnames(Phi) = list(category=0:(l-1),item=1:J,class=1:k)
   if(output){
-    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,Pp=Pp,lk=lk,np=np,aic=aic,bic=bic)
+    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,
+           Pp=Pp,lk=lk,np=np,aic=aic,bic=bic,lkv=lkv,call=match.call())
   }else{
-    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,De=De,lk=lk,np=np,aic=aic,bic=bic)
+    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,De=De,Phi=Phi,
+           lk=lk,np=np,aic=aic,bic=bic,call=match.call())
   }
+  class(out) = "est_multi_poly"
+  out
+
 }

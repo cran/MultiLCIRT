@@ -59,7 +59,7 @@ ordinal polytomous item responses, \emph{Technical report}, http://arxiv.org/abs
 
 \examples{
 \dontrun{
-## Search models (in terms of number of items) of different Multidimensional LC IRT models with binary responses
+## Search Multidimensional LC IRT models for binary responses
 # Aggregate data
 data(naep)
 X = as.matrix(naep)

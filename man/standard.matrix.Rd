@@ -40,7 +40,7 @@ Spearman correlation matrix, and the standarized matrix Y}
 %}
 
 \examples{
-## Example of standardization of a distribution with randomly generated support points and probabilities
+## Example of standardization of a randomly generated distribution
 X = matrix(rnorm(100),20,5)
 piv = runif(20); piv = piv/sum(piv)
 out = standard.matrix(X,piv)

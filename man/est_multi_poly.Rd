@@ -61,6 +61,7 @@ Maximization algorithm.}
 \item{np}{number of free parameters}
 \item{aic}{Akaike Information Criterion index}
 \item{bic}{Bayesian Information Criterion index}
+\item{lkv}{Vector to trace the log-likelihood evolution across iterations}
 }
 
 \references{
