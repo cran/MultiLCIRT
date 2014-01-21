@@ -1,3 +1,6 @@
 useDynLib(MultiLCIRT)
 
 exportPattern("^[[:alpha:]]+")
+
+# Imported function
+import("MASS")

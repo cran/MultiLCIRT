@@ -28,9 +28,8 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 # outputs : to return additional outputs (Phi,Pp,Piv)
 
 # With k=1
-	cat("*-------------------------------------------------------------------------------*\n")
 	if(k==1){
-	  cat("fit only for LC model with no other imput\n")
+	  cat("fit only for LC model with no other input\n")
 	  link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
 	  X = NULL
 	}
@@ -39,7 +38,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	  difl = 0		
 	}
 # Preliminaries
-# check problems with standard errors
+# check problems with input
     cov = !is.null(X)
     if(cov) X = as.matrix(X)
     miss = any(is.na(S))
@@ -61,6 +60,15 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	l = max(S)+1
 	ns = nrow(S); J = ncol(S)
 	n = sum(yv)
+# check number of response categories
+	flag = FALSE
+	for(j in 1:J) if(length(table(S[,j]))<l) flag = TRUE
+	if(flag){
+		cat("|------------------------------------------ WARNING -----------------------------------------|\n")
+	    cat("| Response variables must have the same number of categories starting with 0                 |\n")
+	    cat("| If for some category the frequency is 0, use only LC models (link=0) or RS models (difl=1) |\n")	
+		cat("|--------------------------------------------------------------------------------------------|\n\n")
+	}
 # checks about the covariates
     if(cov){
     	ncov = ncol(X)
@@ -177,7 +185,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 		Phi = array(0,c(l,J,k)) # probability every response
 		for(j in 1:J){
 			dist = rep(0,l)
-			for(y in 0:(l-1)) dist[y+1] = sum(yv[S[,j]==y])/n
+			for(y in 0:(l-1)) dist[y+1] = (sum(yv[S[,j]==y])+0.5)/n
 			eta = Co%*%log(Ma%*%dist)
 			for(c in 1:k) Phi[,j,c] = inv_glob(eta+grid[c])$p
 		}
@@ -220,8 +228,9 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	if(k==1) Pj=Psi else Pj = Psi*Piv
 	pm = rowSums(Pj)
 	lk = sum(yv*log(pm))
+	cat("*-------------------------------------------------------------------------------*\n")
 	if(link==1 || link==2){
-		cat(c("Model with multdimensional structure\n"))
+		cat(c("Model with multidimensional structure\n"))
 		names = NULL
 		for(j in 1:rm){names = c(names,paste("Dimension",j))}
 		multi_out = as.matrix(multi)
@@ -285,9 +294,14 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
     			}else{
      				for(conf in 1:nconf){
 	    				j = conf1[conf]; h = conf2[conf]
-		    			w[conf,] = colSums(V[S[,j]==h,])
+	    				indh = which(S[,j]==h)
+	    				if(length(indh)==1){
+			    			w[conf,] = V[indh,]
+			    		}else{
+			    			w[conf,] = colSums(V[indh,])	    					
+	    				}
 			    	}
-			    	YY = t(matrix(as.vector(w),2,J*k))
+			    	if(l==2) YY = t(matrix(as.vector(w),2,J*k))
 				}
 			}
 #print(proc.time()-t0)			
