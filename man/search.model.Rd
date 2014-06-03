@@ -5,7 +5,8 @@
 \description{It search for the global maximum of the log-likelihood given a vector of possible number
 	of classes to try for.}
 \usage{search.model(S, yv = rep(1,ns), kv, X = NULL, link = 0, disc = 0,
-	difl = 0, multi = 1:J, fort = FALSE, tol = 10^-10)}
+	difl = 0, multi = 1:J, fort = FALSE, tol = 10^-10, nrep = 2, glob = FALSE, 
+	disp=FALSE)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +27,9 @@
 \item{fort}{to use fortran routines when possible}
 \item{tol}{tolerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
+\item{nrep}{number of repetitions of each random initialization}
+\item{glob}{to use global logits in the covariates}
+\item{disp}{to dispaly partial output}  	         
 }
 
 %\details{

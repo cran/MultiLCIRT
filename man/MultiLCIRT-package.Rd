@@ -20,8 +20,8 @@ individual covariates affecting the class weights.}
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 2.6\cr
-Date: \tab 2014-01-21\cr
+Version: \tab 2.7\cr
+Date: \tab 2014-06-03\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,
@@ -60,8 +60,10 @@ Maintainer: Francesco Bartolucci <bart@stat.unipg.it>
 Bartolucci, F. (2007), A class of multidimensional IRT models for testing unidimensionality and clustering
 items, \emph{Psychometrika}, \bold{72}, 141-157.
 
-Bacci, S., Bartolucci, F. and Gnaldi, M. (2012), A class of Multidimensional Latent Class IRT models for 
-ordinal polytomous item responses, \emph{Technical report}, http://arxiv.org/abs/1201.4667.
+Bacci, S., Bartolucci, F. and Gnaldi, M. (2014), A class of Multidimensional Latent Class IRT models for 
+ordinal polytomous item responses, \emph{Communication in Statistics - Theory and Methods}, \bold{43}, 787-800.
+
+Bartolucci, F., Bacci, S. and Gnaldi, M. (2014), MultiLCIRT: An R package for multidimensional latent class item response models, \emph{Computational Statistics and Data Analysis}, \bold{71}, 971-985.
 }
 %~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
 \keyword{ package }

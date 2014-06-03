@@ -1,25 +1,29 @@
-\name{est_multi_poly}
-\alias{est_multi_poly}
+\name{est_multi_poly_clust}
+\alias{est_multi_poly_clust}
 %- Also NEED an '\alias' for EACH other topic documented here.
 
-\title{Estimate multidimensional LC IRT model for dichotomous and polytomous responses}
+\title{Estimate multidimensional and multilevel LC IRT model for dichotomous and polytomous responses}
 
 \description{The function performs maximum likelihood estimation of the parameters of the IRT models
-assuming a discrete distribution for the ability. Every ability level corresponds to a latent
+assuming a discrete distribution for the ability and a discrete distribution for the latent variable
+at cluster level. Every ability level corresponds to a latent
 class of subjects in the reference population. Maximum likelihood estimation is based on Expectation-
 Maximization algorithm.}
 
-\usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
-		difl = 0, multi = 1:J, piv = NULL, Phi = NULL, gac = NULL, De = NULL, 
-		fort = FALSE, tol = 10^-10, disp = FALSE, output = FALSE, glob=FALSE)}
+\usage{est_multi_poly_clust(S, kU, kV, W = NULL, X = NULL, clust, start = 0, link = 0, 
+	                        disc = 0, difl = 0, multi = 1:J, piv = NULL, Phi = NULL, 
+	                        gac = NULL, DeU = NULL, DeV = NULL,fort = FALSE, 
+	                        tol = 10^-10, disp = FALSE, output = FALSE)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
   \item{S}{matrix of all response sequences observed at least once in the sample and listed row-by-row
            (use NA for missing response)}
-  \item{yv}{vector of the frequencies of every response configuration in \code{S}}
-  \item{k}{number of ability levels (or latent classes)}
-  \item{X}{matrix of covariates that affects the weights}
+  \item{kU}{number of support points (or latent classes at cluster level)}
+  \item{kV}{number of ability levels (or latent classes at individual level)}
+  \item{W}{matrix of covariates that affects the weights at cluster level}
+  \item{X}{matrix of covariates that affects the weights at individual level}
+  \item{clust}{vector of cluster indicator for each unit}
   \item{start}{method of initialization of the algorithm (0 = deterministic, 1 = random, 2 = arguments given as
                input)}
   \item{link}{type of link function (0 = no link function, 1 = global logits, 2 = local logits);
@@ -34,13 +38,13 @@ Maximization algorithm.}
   \item{piv}{initial value of the vector of weights of the latent classes (if start=2)}
   \item{Phi}{initial value of the matrix of the conditional response probabilities (if start=2)}
   \item{gac}{initial value of the complete vector of discriminating indices (if start=2)}
-  \item{De}{initial value of regression coefficients for the covariates (if start=2)}
+  \item{DeU}{initial value of regression coefficients for the covariates in W (if start=2)}
+  \item{DeV}{initial value of regression coefficients for the covariates in X (if start=2)}
   \item{fort}{to use fortran routines when possible}
   \item{tol}{tolerance level for checking convergence of the algorithm as relative difference between 
   	         consecutive log-likelihoods}
   \item{disp}{to display the likelihood evolution step by step}
   \item{output}{to return additional outputs (Phi,Pp,Piv)}
-  \item{glob}{to use global logits in the covariates}  
 }
 
 %\details{
@@ -92,62 +96,43 @@ ordinal polytomous item responses, \emph{Communication in Statistics - Theory an
 %}
 
 \examples{
-## Estimation of different Multidimensional LC IRT models with binary responses
-# Aggregate data
-data(naep)
-X = as.matrix(naep)
-out = aggr_data(X)
-S = out$data_dis
-yv = out$freq
-# Define matrix to allocate each item to one dimension 
-multi1 = rbind(c(1,2,9,10),c(3,5,8,11),c(4,6,7,12))
-# Three-dimensional Rasch model with 3 latent classes
-# the tolerance level has been rise to increase the speed (to be reported to a smaller value)
-out1 = est_multi_poly(S,yv,k=3,start=0,link=1,multi=multi1,tol=10^-6)
-\dontrun{
-# Three-dimensional 2PL model with 3 latent classes
-out2 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
-}
 
 \dontrun{
-## Estimation of different Multidimensional LC IRT models with ordinal responses
-# Aggregate data
-data(hads)
-X = as.matrix(hads)
-out = aggr_data(X)
-S = out$data_dis
-yv = out$freq
-# Define matrix to allocate each item to one dimension 
-multi1 = rbind(c(2,6,7,8,10,11,12),c(1,3,4,5,9,13,14))
-# Bidimensional LC Graded Response Model with 3 latent classes 
-# (free discriminating and free difficulty parameters)
-out1 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
-# Bidimensional LC Partial Credit Model with 3 latent classes 
-# (constrained discrimination and free difficulty parameters)
-out2 = est_multi_poly(S,yv,k=3,start=0,link=2,multi=multi1)
-# Bidimensional LC Rating Scale Model with 3 latent classes 
-# (constrained discrimination and constrained difficulty parameters)
-out3 = est_multi_poly(S,yv,k=3,start=0,link=2,difl=1,multi=multi1)
+# generate covariate at cluster level
+nclust = 200
+W = matrix(round(rnorm(nclust)*2,0)/2,nclust,1)
+la = exp(W)/(1+exp(W))
+U = 1+1*(runif(nclust)<la)
+clust = NULL
+for(h in 1:nclust){
+	nh = round(runif(1,5,20))
+	clust = c(clust,h*rep(1,nh))	
+} 
+n = length(clust)
+
+# generate covariates
+DeV = rbind(c(1.75,1.5),c(-0.25,-1.5),c(-0.5,-1),c(0.5,1))
+X = matrix(round(rnorm(2*n)*2,0)/2,n,2)
+Piv = cbind(0,cbind(U[clust]==1,U[clust]==2,X)\%*\%DeV)
+Piv = exp(Piv)*(1/rowSums(exp(Piv)))
+V = rep(0,n)
+for(i in 1:n) V[i] = which(rmultinom(1,1,Piv[i,])==1)
+
+# generate responses
+la = c(0.2,0.5,0.8)
+Y = matrix(0,n,10)
+for(i in 1:n) Y[i,] = runif(10)<la[V[i]]
+
+# fit the model with k1=3 and k2=2 classes
+out1 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust)
+out2 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,disp=TRUE,output=TRUE)
+out3 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,disp=TRUE,output=TRUE,
+                            start=2,Phi=out2$Phi,gac=out2$gac,DeU=out2$DeU,DeV=out2$DeV)
+# Rasch                            
+out4 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,link=1,disp=TRUE,output=TRUE)
+out5 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,link=1,disc=1,disp=TRUE,output=TRUE)
 }
 
-\dontrun{
-## Estimation of LC model with covariates
-# gerate covariates
-be = c(0,1,-1)
-X = matrix(rnorm(2000),1000,2)
-u = cbind(1,X)%*%be
-p = exp(u)/(1+exp(u))
-c = 1+(runif(1000)<p)
-Y = matrix(0,1000,5)
-la = c(0.3,0.7)
-for(i in 1:1000) Y[i,] = runif(5)<la[c[i]]
-# fit the model with k=2 and k=3 classes
-out1 = est_multi_poly(Y,k=2,X=X)
-out2 = est_multi_poly(Y,k=3,X=X)
-# fit model with k=2 and k=3 classes in fortran
-out3 = est_multi_poly(Y,k=2,X=X,fort=TRUE)
-out4 = est_multi_poly(Y,k=3,X=X,fort=TRUE)
-}
 }
 
 %% Add one or more standard keywords, see file 'KEYWORDS' in the

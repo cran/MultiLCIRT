@@ -1,15 +1,15 @@
-\name{summary.est_multi_poly}
-\alias{summary.est_multi_poly}
+\name{print.est_multi_poly_clust}
+\alias{print.est_multi_poly_clust}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Print the output of test_dim object}
-\description{Given the output from est_multi_poly, it is written in a readable form}
+\title{Print the output of est_multi_poly_clust object}
+\description{Given the output from est_multi_poly_clust, it is written in a readable form}
 \usage{
-	\method{summary}{est_multi_poly}(object, ...)
+	\method{print}{est_multi_poly_clust}(x, ...)
 	}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-\item{object}{output from est_multi_poly}
+\item{x}{output from est_multi_poly_clust}
 \item{...}{further arguments passed to or from other methods}
 }
 
@@ -28,4 +28,3 @@
 %\seealso{
 %%% ~~objects to See Also as \code{\link{help}}, ~~~
 %}
-

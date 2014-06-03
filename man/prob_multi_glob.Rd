@@ -1,24 +1,17 @@
-\name{est_multi_glob}
-\alias{est_multi_glob}
+\name{prob_multi_glob}
+\alias{prob_multi_glob}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Fit marginal regression models for categorical responses}
-\description{It estimates marginal regression models to datasets consisting of a categorical response and one or more covariates by a Fisher-scoring algorithm; this is an internal function.}
+\title{Global probabilities}
+\description{It provides matrix of probabilities under different parametrizations.}
 
-\usage{est_multi_glob(Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL, dis = NULL, 
-                            disp=FALSE, only_sc = FALSE, Int = NULL)}
+\usage{prob_multi_glob(X, model, be, ind=(1:dim(X)[3]))}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Y}{matrix of response configurations}
   \item{X}{array of all distinct covariate configurations}
   \item{model}{type of logit (g = global, l = local, m = multinomial)}
-  \item{ind}{vector to link responses to covariates}
   \item{be}{initial vector of regression coefficients}
-  \item{Dis}{matrix for inequality constraints on be}
-  \item{dis}{vector for inequality constraints on be}
-  \item{disp}{to display partial output}
-  \item{only_sc}{to exit giving only the score}
-  \item{Int}{matrix of the fixed intercepts}  
+  \item{ind}{vector to link responses to covariates}
 }
 
 %\details{
@@ -26,8 +19,7 @@
 %}
 
 \value{
-  \item{be}{estimated vector of regression coefficients}
-  \item{lk}{log-likelihood at convergence}
+  \item{Pdis}{matrix of distinct probability vectors}
   \item{P}{matrix of the probabilities for each covariate configuration}
 }
 
@@ -52,5 +44,3 @@ Statistical Society, Series B}, \bold{57}, 533-546.}
 %}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{maximum likelihood estimation}
-\keyword{Fisher-scoring algorithm}% __ONLY ONE__ keyword per line

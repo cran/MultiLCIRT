@@ -4,3 +4,4 @@ exportPattern("^[[:alpha:]]+")
 
 # Imported function
 import("MASS")
+import("limSolve")
