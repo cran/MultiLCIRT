@@ -6,7 +6,7 @@
 
 \docType{package}
 
-\title{Multidimensional latent class (LC) Item Response Theory (IRT) models}
+\title{Multidimensional Latent Class (LC) Item Response Theory (IRT) Models}
 
 \description{This package provides a flexible framework for the Item Response Theory (IRT) analysis 
 of dichotomous and ordinal polytomous outcomes 
@@ -20,8 +20,8 @@ individual covariates affecting the class weights.}
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 2.7\cr
-Date: \tab 2014-06-03\cr
+Version: \tab 2.9\cr
+Date: \tab 2015-02-09\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,

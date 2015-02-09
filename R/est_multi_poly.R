@@ -1,6 +1,6 @@
 est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
                            multi=1:J,piv=NULL,Phi=NULL,gac=NULL,De=NULL,fort=FALSE,tol=10^-10,
-                           disp=FALSE,output=FALSE,glob=FALSE){
+                           disp=FALSE,output=FALSE,out_se=FALSE,glob=FALSE){
 
 #        [piv,Th,Bec,gac,fv,Phi,Pp,lk,np,aic,bic] = est_multi_poly(S,yv,k,start,link,disc,difl,multi,piv,Th,bec,gac)
 #
@@ -26,16 +26,17 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 # tol  : relative tolerance level for convergence
 # disp : TRUE for displying the likelihood evolution step by step
 # output : to return additional outputs (Phi,Pp,Piv)
+# out_se : to return standard errors
 # glob : for global parametrization of the prior probabilities
 #
 # OUTPUT:
 # ent  : entropy
 
-
 # With k=1
 	if(k==1){
 	  cat("fit only for LC model with no other input\n")
 	  link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
+	  output = FALSE
 	  X = NULL
 	}
 	if(max(S,na.rm=TRUE)==1 & difl!=0){
@@ -348,7 +349,8 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 					if(rm==1){
 						ZZ1int = ZZ1[,fv,]	
 					}else{
-						ZZ1int = apply(ZZ1[,fv,],c(1,3),sum)							
+						Tmp = array(ZZ1[,fv,],c(l-1,rm,J*k))
+						ZZ1int = apply(Tmp,c(1,3),sum)							
 					}
 					ZZ1 = array(ZZ1[,-fv,],dimz)
 					if(l==2) ZZ1int = matrix(ZZ1int,1,length(ZZ1int))
@@ -490,19 +492,24 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
   }else De = NULL
 	dimnames(Phi) = list(category=0:(l-1),item=1:J,class=1:k)
 	if(link==0 & !glob){
+		Phi = pmax(Phi,10^-50)
   		par = NULL
   		for(c in 1:k) for(j in 1:J) par = c(par,log(Phi[-1,j,c]/Phi[1,j,c]))
 	}
 	if(!cov){
 		de = De = log(piv[-1]/piv[1])
 	}
-	if(output){
+	if(out_se){
 		lde = length(de); lpar = length(par); lga = 0
 		par_comp = c(de,par)
 		if(disc==1){
 			lga = length(ga)
 			par_comp = c(par_comp,ga)
 		}
+		if(disp){
+			cat("computation of derivatives\n")
+			cat(length(par_comp),"parameters\n")
+		}		
   		out = lk_obs_score(par_comp,lde,lpar,lga,S,R,yv,k,rm,l,J,fv,link,disc,indga,glob,refitem,
                            miss,ltype,XXdis,Xlabel,ZZ0,fort)
 		scn = rep(0,length(par_comp)); Jn = NULL
@@ -510,9 +517,12 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 			par_comp1 = par_comp; par_comp1[j] = par_comp1[j]+10^-6
 			out1 = lk_obs_score(par_comp1,lde,lpar,lga,S,R,yv,k,rm,l,J,fv,link,disc,indga,glob,refitem,
    	                            miss,ltype,XXdis,Xlabel,ZZ0,fort)
-			scn[j] = (out1$lk-lk)*10^6	
-			Jn = cbind(Jn,(out1$sc-out$sc)*10^6)
+			 scn[j] = (out1$lk-lk)*10^6	
+			 Jn = cbind(Jn,(out1$sc-out$sc)*10^6)
+			if(disp) if(j/10>floor(j/10)) cat(".") else cat(round(j/10))
+	  		if(disp) if(j/100==floor(j/100)) cat("\n")		
   		}
+  		if(disp) cat("\n")  		
   		Jn = (Jn+t(Jn))/2
   		Vn = ginv(Jn)
   		se = sqrt(abs(diag(Vn)))
@@ -521,18 +531,14 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
   		if(disc==1) sega = se[lpar+lde+(1:lga)] else sega = NULL
 		if(glob) seDe = matrix(sede,ncov+k-1,1)
 		else seDe = matrix(sede,ncov+1,k-1)  	
-		print(c(lk,out$lk,lk-out$lk))
-  		print(cbind(out$sc,scn,out$sc-scn))
+		# print(c(lk,out$lk,lk-out$lk))
+  		# print(cbind(out$sc,scn,out$sc-scn))
 	}
-  if(output){
-    out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,De=De,Piv=Piv,
-           Pp=Pp,lk=lk,np=np,aic=aic,bic=bic,ent=ent,lkv=lkv,
-           seDe=seDe,separ=separ,sega=sega,Vn=Vn,call=match.call())
-  }else{
     out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,De=De,Phi=Phi,
            lk=lk,np=np,aic=aic,bic=bic,ent=ent,call=match.call())
-  }
-  class(out) = "est_multi_poly"
-  out
+    if(output){	out$Piv=Piv; out$Pp=Pp; out$lkv = lkv}
+    if(out_se){out$seDe=seDe; out$separ=separ; out$sega=sega; out$Vn=Vn}
+	class(out) = "est_multi_poly"
+  	return(out)
 
 }

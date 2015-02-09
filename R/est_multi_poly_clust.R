@@ -2,31 +2,6 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
                            multi=1:J,piv=NULL,Phi=NULL,gac=NULL,DeU=NULL,DeV=NULL,fort=FALSE,tol=10^-10,
                            disp=FALSE,output=FALSE){
 
-# Fit Latent Class model and some restricted versions with k classes for ordinal (NA for missing data)
-# 
-# S    : matrix of available configurations
-# X    : matrix of corresponding covariates affecting the ability
-# kU   : number of latent classes at cluster level
-# kV   : number of latent classes at unit level
-# W    : matrix of covariates at cluster level
-# X    : matrix of covariates for the multinomial logit on the class weights
-# clust: vector of cluster indicator for each unit
-# start: type of startgine values (0 = deterministic, 1 = random)
-# link : type of link (0 = LC, 1 = GRM, 2 = PCM)
-# disc : discriminating indices (0 = constrained, 1 = free)
-# difl : difficulty levels (0 = free, 1 = additive decomposition)
-# lk   : maximum log-likelihood
-# piv  : weights of the latent classes
-# Phi  : conditional distributions given the latent classes
-# np   : number of free parameters
-# bic  : Bayesian information criterion
-# Th,be,ga : parameters for the model 4 (Th=Psi if start==3)
-# fv   : list of items constrained
-# fort : T for using fortran code for covariates, F using R code only
-# tol  : relative tolerance level for convergence
-# disp : TRUE for displying the likelihood evolution step by step
-# outputs : to return additional outputs (Phi,Pp,Piv)
-
 # With kV=1
 	if(kV==1){
 	  cat("fit only for LC model with no other input\n")
@@ -89,6 +64,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
    		for(i in 1:Wndis) WWdis[,,i] = II%x%t(c(1,Wdis[i,]))
    	}else{
    		ncov1 = 0
+   		WWdis = FALSE
     }
     if(cov2){
     	# XXdis has dimension equal to distinct X x kV
@@ -109,6 +85,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
     	}
     }else{
     	ncov2 = 0
+    	XXdis = NULL
     }
 # about models
 	if(link==0){
@@ -327,17 +304,23 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 	cat(c("Type of initialization =       ",start,"\n"))
 	cat("*-------------------------------------------------------------------------------*\n")		
 	if(disp){
-		if(disc==0 || length(ga)==0){
-    		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-    		cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
-    		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-		}else if(disc==1){
-			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
-			cat("  iteration |   classes   |    model    |    lk       |    lk-lko   |      dis    |   min(ga)   |   max(ga)   |   min(par)  |   max(par)  |\n");
-			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+		if(link==0){
+    				cat("------------|-------------|-------------|-------------|-------------|\n")
+	    			cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |\n");
+    				cat("------------|-------------|-------------|-------------|-------------|\n")			
+		}else{
+			if(disc==0 || length(ga)==0){
+    				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+	    			cat("  iteration |   classes   |    model    |      lk     |    lk-lko   |     dis     |   min(par)  |   max(par)  |\n");
+    				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+			}else if(disc==1){
+				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
+				cat("  iteration |   classes   |    model    |    lk       |    lk-lko   |      dis    |   min(ga)   |   max(ga)   |   min(par)  |   max(par)  |\n");
+				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n");
 
+			}
+			cat(sprintf("%11g",c(0,kU*10+kV,link,lk)),"\n",sep=" | ")
 		}
-		cat(sprintf("%11g",c(0,kU*10+kV,link,lk)),"\n",sep=" | ")
 	}
  	it = 0; lko = lk-10^10; dis = 0; par = NULL; dga = NULL; lkv = NULL
 # Iterate until convergence
@@ -460,9 +443,13 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 		if(it>1 & link>0) dis = max(c(abs(par-paro),abs(ga-gao),abs(piv-pivo)))
 		if(disp){
 			if(it/10==floor(it/10)){
-				if(disc==0 || length(ga)==0) cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ") else{
-				if(disc==1) cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
-				}
+				if(link==0){
+					cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko)),"\n",sep=" | ")				
+				}else{
+					if(disc==0 || length(ga)==0) cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ") else{
+					if(disc==1) cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
+					}
+				}			
 #t2 = proc.time()-t0
 #print(c(t1[1],t2[1]))
 			}
@@ -471,16 +458,24 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 	}
 	if(disp){
 		if(it/10>floor(it/10)){
-			if(disc==0 || length(ga)==0){
-				cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ")
-			}else if(disc==1){
-				cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
+			if(link==0){
+				cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko)),"\n",sep=" | ")				
+			}else{
+				if(disc==0 || length(ga)==0){
+					cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(par),max(par))),"\n",sep=" | ")
+				}else if(disc==1){
+					cat(sprintf("%11g",c(it,kU*10+kV,link,lk,lk-lko,dis,min(ga),max(ga),min(par),max(par))),"\n",sep=" | ")
+				}
 			}
 		}
-		if(disc==0 || length(ga)==0){
-	   		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
-		}else if(disc==1){
-			cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+		if(link==0){
+	   		cat("------------|-------------|-------------|-------------|-------------|\n")
+		}else{
+			if(disc==0 || length(ga)==0){
+		   		cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+			}else if(disc==1){
+				cat("------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|\n")
+			}
 		}
 	}
 # Compute number of parameters  
@@ -597,9 +592,9 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
   		separ = se[lde1+lde2+(1:lpar)]
   		if(disc==1) sega = se[lde1+lde2+lpar+(1:lga)] else sega = NULL
 		seDeU = matrix(sede1,ncov1+1,kU-1)  	
-		seDeV = matrix(sede2,ncov2+kU,kV-1)  	
-		print(c(lk,out$lk,lk-out$lk))
-  		print(cbind(out$sc,scn,out$sc-scn))
+		seDeV = matrix(sede2,ncov2+kU,kV-1)
+		# print(c(lk,out$lk,lk-out$lk))
+  		# print(cbind(out$sc,scn,out$sc-scn))
 	}  
   if(output){
     out = list(piv=piv,Th=Th,Bec=Bec,gac=gac,fv=fv,Phi=Phi,DeU=DeU,DeV=DeV,La=La,Piv=Piv,

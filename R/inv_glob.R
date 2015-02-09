@@ -1,17 +1,18 @@
-inv_glob <-
-function(eta,type="g",der=F){
+inv_glob <-function(eta,type="g",der=F){
 
 # if only one logit
+	D = NULL
+	eta = as.vector(eta)
   if(length(eta)==1){
   	p = exp(eta)
   	p = c(1,p)/(1+p)
-  	out = list(p=p,D=NULL)
+  	out = list(p=p,D=D)
   }else{
 # Invert global logits collected in column vectoreta
 	  if(length(eta)==1){
   		p = exp(eta); p = p/(1+p)
   		p = c(1-p,p)
-	   	out = list(p=p,D=NULL)
+	   	out = list(p=p,D=D)
 	  }else{
 # invert parametrization
 		if(type=="g"){

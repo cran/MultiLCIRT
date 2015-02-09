@@ -5,3 +5,13 @@ exportPattern("^[[:alpha:]]+")
 # Imported function
 import("MASS")
 import("limSolve")
+
+# S3methods
+S3method(print, class_item)
+S3method(print, est_multi_poly)
+S3method(print, est_multi_poly_clust)
+S3method(print, test_dim)
+S3method(summary, class_item)
+S3method(summary, est_multi_poly)
+S3method(summary, est_multi_poly_clust)
+S3method(summary, test_dim)

@@ -1,27 +1,5 @@
 est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL, dis = NULL, 
-                            disp=FALSE, only_sc = FALSE, Int = NULL){
-
-# Fit multinomial logit model based on a reference category, local, or global parametrization
-#
-# INPUT:
-# Y      : matrix of responses of size n x l, where l is the number of response categories
-# X      : array of covariates of size (l-1) x ncov x nd, where ncov is the number of covariates,
-#          nd is the number of distinct covariate conifgurations
-# model  : type of logits (m = reference category, l = local logits, g = global logits)
-# ind    : for each row of Y indicates the corresponding matrix of covariates in X (optional)
-# be     : vector of parameters (optional)
-# Dis    : matrix to specify inequality constraints on be (optional)
-# dis    : vector to speficy inequality constraints on be (optional), Dis%*%be >= dis
-# disp   : to dispaly partial output (output)
-# only_sc: to exit without fitting with only score and information (output)
-# Int    : matrix of intercepts (output)
-# 
-# OUTPUT:
-# be     : final vector of parameters
-# lk     : final log-likelihood
-# Pdis   : matrix of probabilities for each covariate matrix in X
-# P      : matrix of probabilities for each row in Y
-# sc     : score vector with respect to be
+                            disp=FALSE, only_sc = FALSE, Int = NULL, der_single = FALSE){
 
 # preliminaries                           	
 	if(is.null(dis) & !is.null(Dis)) dis = rep(0,nrow(Dis))
@@ -85,10 +63,10 @@ est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL,
     it = 0
     flag = TRUE
     if(disp) print(c(0,lk))
-    while ((abs(lk - lko) > 10^-5 | it == 0) & it < 10^4) {
+    while ((abs(lk - lko) > 10^-6 | it == 0) & it < 10^4) {
         it = it + 1
-        s = 0
-        FI = 0
+        s = 0; FI = 0
+        if(der_single) Sc = matrix(0,n,ncov)
         for (h in 1:nd) {
             indh = which(ind == h)
             p = Pdis[h, ]
@@ -98,11 +76,19 @@ est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL,
             if (model == "g" || model == "l") {
                 ve = 1/as.vector(Ma %*% p)
                 D = ginv(Co %*% diag(ve) %*% Ma %*% diag(p) %*% G)
-                D = t(Xh) %*% (t(D) %*% t(G))
+                D = t(G%*%D%*%Xh)
             }
-            for (i in indh) s = s + D %*% (Y[i, ] - w[i] * p)
-            FI = FI + sum(w[indh]) * (D %*% (diag(p) - p %*% 
-                t(p)) %*% t(D))
+            if(der_single){
+	        	for (i in indh){
+	        		Sc[i,] = D %*% (Y[i, ] - w[i] * p)     
+	        		s = s + Sc[i,]
+	        	}       	
+            }else{
+            	if(length(indh)==1) tmp = Y[indh,]
+            	else tmp = as.vector(colSums(Y[indh,]))
+	            s = s + D %*% (tmp -sum(w[indh]) * p)
+	        }
+            FI = FI + sum(w[indh]) * (D %*% (diag(p) - p%*%t(p)) %*% t(D))
         }
         if(!only_sc){
 		    if (rcond(FI) < 10^-15){
@@ -136,5 +122,6 @@ est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL,
         	if(disp) print(c(it,lk,lk-lko))
         }
     }
-    out = list(be = be, lk = lk, Pdis = Pdis, P = P, sc = s)
+    if(der_single) out = list(be = be, lk = lk, Pdis = Pdis, P = P, Sc = Sc, sc = s)
+    else out = list(be = be, lk = lk, Pdis = Pdis, P = P, sc = s)
 }

@@ -11,7 +11,8 @@ Maximization algorithm.}
 
 \usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
 		difl = 0, multi = 1:J, piv = NULL, Phi = NULL, gac = NULL, De = NULL, 
-		fort = FALSE, tol = 10^-10, disp = FALSE, output = FALSE, glob=FALSE)}
+		fort = FALSE, tol = 10^-10, disp = FALSE, output = FALSE, out_se = FALSE,
+		glob = FALSE)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -40,6 +41,7 @@ Maximization algorithm.}
   	         consecutive log-likelihoods}
   \item{disp}{to display the likelihood evolution step by step}
   \item{output}{to return additional outputs (Phi,Pp,Piv)}
+  \item{out_se}{to return standard errors}
   \item{glob}{to use global logits in the covariates}  
 }
 
@@ -66,8 +68,8 @@ Maximization algorithm.}
 \item{ent}{Etropy index to measure the separation of classes}
 \item{lkv}{Vector to trace the log-likelihood evolution across iterations (if output=TRUE)}
 \item{seDe}{Standard errors for De (if output=TRUE)}
-\item{separ}{Standard errors for vector of parameters containing Th and Be (if output=TRUE)}
-\item{sega}{Standard errors for vector of discrimination indices (if output=TRUE)}
+\item{separ}{Standard errors for vector of parameters containing Th and Be (if out_se=TRUE)}
+\item{sega}{Standard errors for vector of discrimination indices (if out_se=TRUE)}
 \item{Vn}{Estimated variance-covariance matrix for all parameter estimates (if output=TRUE)}
 }
 

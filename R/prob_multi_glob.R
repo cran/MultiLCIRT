@@ -1,10 +1,6 @@
 prob_multi_glob <- function(X, model, be, ind=(1:dim(X)[3])){
 	
 # compute global logit probabilities	
-# X    :     matrix of covariates
-# model: type of model ("l" for multinomial logit, "g" for global logit)
-# be   : vector of parameters
-# ind  : vector of indices to expand the matrix of probabilities
     l = nrow(X) + 1
     ncov = ncol(X)
     nd = dim(X)[3]

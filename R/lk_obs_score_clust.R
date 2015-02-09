@@ -12,10 +12,18 @@ lk_obs_score_clust <- function(par_comp,lde1,lde2,lpar,lga,S,R,kU,kV,rm,l,J,fv,l
 	par = par_comp[lde1+lde2+(1:lpar)]	
 	if(disc==1) ga = par_comp[lde1+lde2+lpar+(1:lga)]			
 # Compute log-likelihood
-    out = prob_multi_glob(WWdis,"m",de1,Wlabel)
-    Ladis = out$Pdis; La = out$P
-    out = prob_multi_glob(XXdis,"m",de2,Xlabel)
-    Pdis = out$Pdis; Piv = out$P
+	if(kU==1){
+		La = matrix(1,nclust,1)
+	}else{
+	    out = prob_multi_glob(WWdis,"m",de1,Wlabel)
+	    Ladis = out$Pdis; La = out$P
+	}
+	if(kV==1){
+		Piv = rep(1,ns)
+	}else{
+	    out = prob_multi_glob(XXdis,"m",de2,Xlabel)
+    	Pdis = out$Pdis; Piv = out$P
+    }
  	Piv = array(t(Piv),c(kV,ns,kU))
  	Piv = aperm(Piv,c(2,1,3))
 	if(disc==0) ZZ = ZZ0
@@ -116,8 +124,10 @@ lk_obs_score_clust <- function(par_comp,lde1,lde2,lpar,lga,S,R,kU,kV,rm,l,J,fv,l
 	}
 	sc_par = est_multi_glob(YY,ZZ,ltype,be=par,only_sc=TRUE)$sc
 # Update piv
-	sc_de1 = est_multi_glob(Vclust,WWdis,"m",Wlabel,de1,only_sc=TRUE)$sc
-  	sc_de2 = est_multi_glob(Vcomp,XXdis,"m",Xlabel,de2,only_sc=TRUE)$sc	
+	if(kU==1) sc_de1 = NULL
+	else sc_de1 = est_multi_glob(Vclust,WWdis,"m",Wlabel,de1,only_sc=TRUE)$sc
+	if(kV==1) sc_de2 = NULL
+	else sc_de2 = est_multi_glob(Vcomp,XXdis,"m",Xlabel,de2,only_sc=TRUE)$sc	
 # output
 	sc = c(sc_de1,sc_de2,sc_par,sc_ga)
 	out = list(lk=lk,sc=sc)
