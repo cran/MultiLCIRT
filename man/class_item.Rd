@@ -5,7 +5,8 @@
 \description{It performs a hierarchical classification of a set of test items on the basis of 
 the responses provided by a sample of subjects. The classification is based on a
 sequence of likelihood ratio tests between pairs of multidimensional models suitably formulated.}
-\usage{class_item(S, yv, k, link = 1, disc = 0, difl = 0, fort = FALSE, disp = FALSE)}
+\usage{class_item(S, yv, k, link = 1, disc = 0, difl = 0, fort = FALSE,
+           disp = FALSE, tol = 10^-10)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +23,7 @@ sequence of likelihood ratio tests between pairs of multidimensional models suit
   \item{difl}{indicator of constraints on the difficulty levels (0 = free, 1 = rating scale parametrization)}
   \item{fort}{to use fortran routines when possible}
   \item{disp}{to display the likelihood evolution step by step}
+  \item{tol}{tolerance level for convergence}
 }
 
 %\details{
@@ -85,8 +87,8 @@ for(i in 1:n) for(j in 1:r){
 out = aggr_data(data)
 S = out$data_dis
 yv = out$freq
-# Create dendrogram for items classification, by assuming k=3 latent classes
-# and a Rasch parameterization
+# Create dendrogram for items classification, by assuming k=3 latent
+# classes and a Rasch parameterization
 out = class_item(S,yv,k=3,link=1)
 summary(out)
 plot(out$dend)
@@ -100,8 +102,8 @@ X = as.matrix(naep)
 out = aggr_data(X)
 S = out$data_dis
 yv = out$freq
-# Create dendrogram for items classification, by assuming k=4 latent classes
-# and a Rasch parameterization
+# Create dendrogram for items classification, by assuming k=4 latent
+# classes and a Rasch parameterization
 out = class_item(S,yv,k=4,link=1)   
 summary(out)
 plot(out$dend)

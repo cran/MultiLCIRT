@@ -94,7 +94,7 @@ est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL,
 		    if (rcond(FI) < 10^-15){
     			if(flag){
 			    	flag = FALSE
-    				cat("matrix close to singularity in est_multi_glob\n")
+    				warning("matrix close to singularity in est_multi_glob")
     			}
         		dbe = ginv(FI) %*% s
         	}
@@ -105,8 +105,8 @@ est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL,
     	    	LL = chol(FI)
 				dbe = lsei(A=LL,B=LL%*%(be+dbe),G=Dis,H=dis,verbose=FALSE)$X-be
        		}
-        	be = be + dbe
-        	P = matrix(0, nd, l)
+        	be0 = be; be = be + dbe
+        	P0 = P; P = matrix(0, nd, l)
         	for (h in 1:nd) {
    		        if(is.null(Int)) x0 = 0 else x0 = Int[,h]
 	            if (model == "m") 
@@ -119,6 +119,10 @@ est_multi_glob <- function (Y, X, model, ind = 1:nrow(Y), be = NULL, Dis = NULL,
 	    	Pdis = P; P = P[ind,]
         	lko = lk
         	lk = sum(Y * log(P))
+        	if(is.na(lk)){
+        		lk = lko; be = be0; P = P0
+        		warning("convergence problemsin est_multi_glob")
+        	}
         	if(disp) print(c(it,lk,lk-lko))
         }
     }

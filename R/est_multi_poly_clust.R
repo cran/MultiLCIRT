@@ -4,7 +4,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 
 # With kV=1
 	if(kV==1){
-	  cat("fit only for LC model with no other input\n")
+	  cat("fit only independence model\n")
 	  kU = 1; link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
 	  X = NULL
 	}
@@ -17,13 +17,17 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
     cov1 = !is.null(W); if(kU==1) cov1 = FALSE
     cov2 = !is.null(X); if(kV==1) cov2 = FALSE
     if(cov1){
-    	W = as.matrix(W)
-    	namesW = colnames(W)
+	    	W = as.matrix(W)
+    		namesW = colnames(W)
+    }else{
+    		namesW = NULL
     }
     if(cov2){
-    	X = as.matrix(X)
-    	namesX = colnames(X)
-    }
+	    	X = as.matrix(X)
+    		namesX = colnames(X)
+	}else{
+		namesX = NULL
+	}
     miss = any(is.na(S))
 	ns = nrow(S); J = ncol(S)
 	nclust = max(clust)
@@ -55,37 +59,51 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 # checks about the covariates
     if(cov1){
     	# WWdis has dimension equal to distinct W x kU
-    	ncov1 = ncol(W)
-    	if(is.null(ncov1)){W = as.matrix(W); ncov1 = 1}
-    	out = aggr_data(W,fort=fort)
-    	Wdis = as.matrix(out$data_dis); Wlabel = out$label; Wndis = max(out$label)
-    	WWdis = array(0,c(kU-1,(kU-1)*(1+ncov1),Wndis))
-    	II = diag(kU-1)
+	    	ncov1 = ncol(W)
+    		if(is.null(ncov1)){W = as.matrix(W); ncov1 = 1}
+    		out = aggr_data(W,fort=fort)
+    		Wdis = as.matrix(out$data_dis); Wlabel = out$label; Wndis = max(out$label)
+    		WWdis = array(0,c(kU-1,(kU-1)*(1+ncov1),Wndis))
+    		II = diag(kU-1)
    		for(i in 1:Wndis) WWdis[,,i] = II%x%t(c(1,Wdis[i,]))
    	}else{
    		ncov1 = 0
-   		WWdis = FALSE
+    		WWdis = array(diag(kU-1),c(kU-1,kU-1,1))
+   		Wlabel = rep(1,nclust)
     }
     if(cov2){
-    	# XXdis has dimension equal to distinct X x kV
-    	ncov2 = ncol(X)
-    	if(is.null(ncov2)){X = as.matrix(X); ncov2 = 1}
-    	out = aggr_data(X,fort=fort)
-    	Xdis = as.matrix(out$data_dis); Xlabel = out$label; Xndis = max(out$label)
-    	XXdis = array(0,c(kV-1,(kV-1)*(kU+ncov2),kU*Xndis))
-    	II = diag(kV-1)
-    	j = 0
-    	for(u in 1:kU){
-    		uv = rep(0,kU); uv[u] = 1
-    		for(i in 1:Xndis){
-    			j = j+1
-    			XXdis[,,j] = II%x%t(c(uv,Xdis[i,]))
+# XXdis has dimension equal to distinct X x kV
+	    	ncov2 = ncol(X)	    	
+		if(is.null(ncov2)){X = as.matrix(X); ncov2 = 1}
+    		out = aggr_data(X,fort=fort)
+    		Xdis = as.matrix(out$data_dis); Xlabel = out$label; Xndis = max(out$label)
+    		XXdis = array(0,c(kV-1,(kV-1)*(kU+ncov2),kU*Xndis))
+    		II = diag(kV-1)
+    		j = 0
+    		for(u in 1:kU){
+    			uv = rep(0,kU); uv[u] = 1
+    			for(i in 1:Xndis){
+    				j = j+1
+    				XXdis[,,j] = II%x%t(c(uv,Xdis[i,]))
+    			}
+    			if(u>1) Xlabel = c(Xlabel,max(Xlabel)+out$label)
     		}
-    		if(u>1) Xlabel = c(Xlabel,max(Xlabel)+out$label)
-    	}
     }else{
-    	ncov2 = 0
-    	XXdis = NULL
+	    	ncov2 = 0
+	    	if(kV==1){
+			XXdis = NULL
+		}else{
+			Xlabel = rep(1,ns)
+    		XXdis = array(0,c(kV-1,(kV-1)*kU,kU))
+    		II = diag(kV-1)
+    		j = 0
+    		for(u in 1:kU){
+    			uv = rep(0,kU); uv[u] = 1
+   				j = j+1
+   				XXdis[,,j] = II%x%t(uv)
+    			if(u>1) Xlabel = c(Xlabel,max(Xlabel)+rep(1,ns))
+    		}			
+		}
     }
 # about models
 	if(link==0){
@@ -145,7 +163,9 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 			}
 		}
 # design matrix
-		if(difl==0) ZZ = array(0,c(l-1,kV*rm+(l-1)*J-rm,J*kV)) else{
+		if(difl==0){
+			ZZ = array(0,c(l-1,kV*rm+(l-1)*J-rm,J*kV))
+		}else{
 			if(difl==1) ZZ = array(0,c(l-1,kV*rm+J-rm+rm*(l-2),J*kV))
 		}
 		cont = 0; refitem = matrix(0,J*kV,1)       # reference item of that design matrix
@@ -205,7 +225,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 		}else{
 			de1 = NULL; la = rep(1/kU,kU)
 		}		
-		if(cov2){
+		if(cov2 | kV>1){
 			de2 = rep(c(1:kU,rep(0,ncov2)),kV-1)
 		    piv = NULL
 	    }else{
@@ -227,7 +247,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 		}else{
 			de1 = NULL; la = runif(kU); la = la/sum(la)
 		}
-		if(cov2){
+		if(cov2 || kV>1){
 			de2 = rnorm((kV-1)*(ncov2+kU))/rep(c(rep(1,kU),apply(X,2,sd)),(kV-1))
 			piv = NULL
 		}else{
@@ -264,7 +284,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 	}else{
 		La = rep(1,nclust)%o%la
 	}
-	if(cov2){
+	if(cov2 | kV>1){
 	    out = prob_multi_glob(XXdis,"m",de2,Xlabel)
 	    Pdis = out$Pdis; Piv = out$P
 	 	Piv = array(t(Piv),c(kV,ns,kU))
@@ -403,7 +423,7 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 			La = rep(1,nclust)%o%la
 		}
 # Update piv
-        if(cov2){
+        if(cov2 | kV>1){
   		    out = est_multi_glob(Vcomp,XXdis,"m",Xlabel,de2)
 			de2 = out$be; Pdis = out$Pdis; Piv = out$P
 		 	Piv = array(t(Piv),c(kV,ns,kU))
@@ -482,41 +502,39 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 	if(link == 0){
 		np = kV*J*(l-1)
     }else if(link==1 || link==2){
-    	np = kV*rm+disc*(J-rm)
+    		np = kV*rm+disc*(J-rm)
 		if(difl==0) np = np+(l-1)*J-rm
 		else if(difl==1) np = np+J-rm+l-2
 	}
 	np = np+(kV-1)*(ncov2+kU)
 	np = np+(kU-1)*(ncov1+1)
 # extract parameter estimates  
-  aic = -2*lk+2*np;
-  bic = -2*lk+np*log(ns);
-  if(link==0){
-    Th = NULL; Bec = NULL; gac = NULL; fv = NULL
-  }
-  else if(link==1 || link==2){
-    th = par[indth]; be = par[indbe]
-    if(difl==0){
-      bec = rep(0,J*(l-1)); bec[indbec] = be
-      Bec = t(matrix(bec,l-1,J))
-    }
-    else{
-      bec1 = rep(0,J); bec1[indbec] = be[1:(J-rm)]
-      if(rm==1){
-	      bec2 = rep(0,l-1); bec2[2:(l-1)] = be[J-rm+(1:(l-2))]
-      }else{
-	      bec2 = matrix(0,l-1,rm); bec2[2:(l-1),] = be[J-rm+(1:(rm*(l-2)))]
-    	  dimnames(bec2) = list(level=1:(l-1),dim=1:rm)
-   	  }
-      Bec = list(difficulties=bec1,cutoffs=bec2)
-    }
-    gac = rep(1,J); gac[indga] = ga
-    Th = matrix(th,rm,kV)
-    names2 = NULL
-    for(c in 1:kV){names2 = c(names2,paste("Class",c))}
-    rownames(Th) = names
-    colnames(Th) = names2
-  }
+	aic = -2*lk+2*np;
+	bic = -2*lk+np*log(ns);
+	if(link==0){
+		Th = NULL; Bec = NULL; gac = NULL; fv = NULL
+	}else if(link==1 || link==2){
+		th = par[indth]; be = par[indbe]
+    		if(difl==0){
+      		bec = rep(0,J*(l-1)); bec[indbec] = be
+      		Bec = t(matrix(bec,l-1,J))
+    		}else{
+			bec1 = rep(0,J); bec1[indbec] = be[1:(J-rm)]
+			if(rm==1){
+				bec2 = rep(0,l-1); bec2[2:(l-1)] = be[J-rm+(1:(l-2))]
+			}else{
+				bec2 = matrix(0,l-1,rm); bec2[2:(l-1),] = be[J-rm+(1:(rm*(l-2)))]
+				dimnames(bec2) = list(level=1:(l-1),dim=1:rm)
+   	  		}
+   	  		Bec = list(difficulties=bec1,cutoffs=bec2)
+    		}
+    		gac = rep(1,J); gac[indga] = ga
+		Th = matrix(th,rm,kV)
+    		names2 = NULL
+    		for(c in 1:kV){names2 = c(names2,paste("Class",c))}
+    		rownames(Th) = names
+    		colnames(Th) = names2
+  	}
 # posterior probabilities
 	if(kV==1){
 		Vclust = matrix(1,nclust,1)
@@ -533,25 +551,23 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
 		}
 	}
 # regression coefficients
-	if(cov1){
+	if(!cov1 & kU>1) de1 = log(la[2:kU]/la[1])
+	if(kU>1){
 		DeU = matrix(de1,ncov1+1,kU-1)
-		if(is.null(namesW)){
-      		namesW = c("intercept",paste("W.",1:ncov1,sep=""))	
-		}else{
-			namesW = c("intercept",namesW)
-	  	}
-    	dimnames(DeU) = list(namesW,logit=2:kU)
 	}else{
-  		DeU = NULL
-  	}
-	if(cov2){
+		de1 = DeU = NULL
+	}
+	if(is.null(namesW) & ncov1>0) namesW = c("intercept",paste("W.",1:ncov1,sep=""))	
+	else namesW = c("intercept",namesW)
+	if(kU>1) dimnames(DeU) = list(namesW,logit=2:kU)
+	if(cov2 | kV>1){
 		DeV = matrix(de2,ncov2+kU,kV-1)
-		if(is.null(namesX)){
+		if(is.null(namesX) & ncov2>0){
       		namesX = c(paste("intercept.",1:kU,sep=""),paste("X.",1:ncov2,sep=""))	
 		}else{
 			namesX = c(paste("intercept.",1:kU,sep=""),namesX)
 	  	}
-    	dimnames(DeV) = list(namesX,logit=2:kV)
+	    	dimnames(DeV) = list(namesX,logit=2:kV)
 	}else{
   		DeV = NULL
   	}
@@ -591,8 +607,18 @@ est_multi_poly_clust <- function(S,kU,kV,W=NULL,X=NULL,clust,start=0,link=0,disc
   		sede2 = se[lde1+(1:lde2)]
   		separ = se[lde1+lde2+(1:lpar)]
   		if(disc==1) sega = se[lde1+lde2+lpar+(1:lga)] else sega = NULL
-		seDeU = matrix(sede1,ncov1+1,kU-1)  	
-		seDeV = matrix(sede2,ncov2+kU,kV-1)
+		if(kU>1){
+			seDeU = matrix(sede1,ncov1+1,kU-1) 
+			dimnames(seDeU) = list(namesW,logit=2:kU) 
+		}else{
+			seDeU = NULL
+		}
+		if(kV>1){
+			seDeV = matrix(sede2,ncov2+kU,kV-1)
+		    dimnames(seDeV) = list(namesX,logit=2:kV)
+		}else{
+			seDeV = NULL
+		}
 		# print(c(lk,out$lk,lk-out$lk))
   		# print(cbind(out$sc,scn,out$sc-scn))
 	}  

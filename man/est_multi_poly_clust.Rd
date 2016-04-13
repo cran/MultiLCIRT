@@ -10,10 +10,12 @@ at cluster level. Every ability level corresponds to a latent
 class of subjects in the reference population. Maximum likelihood estimation is based on Expectation-
 Maximization algorithm.}
 
-\usage{est_multi_poly_clust(S, kU, kV, W = NULL, X = NULL, clust, start = 0, link = 0, 
-	                        disc = 0, difl = 0, multi = 1:J, piv = NULL, Phi = NULL, 
-	                        gac = NULL, DeU = NULL, DeV = NULL,fort = FALSE, 
-	                        tol = 10^-10, disp = FALSE, output = FALSE)}
+\usage{est_multi_poly_clust(S, kU, kV, W = NULL, X = NULL, clust,
+                     start = 0, link = 0,  disc = 0, difl = 0,
+                     multi = 1:J, piv = NULL, Phi = NULL,
+                     gac = NULL, DeU = NULL, DeV = NULL,
+                     fort = FALSE, tol = 10^-10, disp = FALSE,
+                     output = FALSE)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -125,12 +127,16 @@ for(i in 1:n) Y[i,] = runif(10)<la[V[i]]
 
 # fit the model with k1=3 and k2=2 classes
 out1 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust)
-out2 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,disp=TRUE,output=TRUE)
-out3 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,disp=TRUE,output=TRUE,
-                            start=2,Phi=out2$Phi,gac=out2$gac,DeU=out2$DeU,DeV=out2$DeV)
+out2 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,disp=TRUE,
+                            output=TRUE)
+out3 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,disp=TRUE,
+                            output=TRUE,start=2,Phi=out2$Phi,gac=out2$gac,
+                            DeU=out2$DeU,DeV=out2$DeV)
 # Rasch                            
-out4 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,link=1,disp=TRUE,output=TRUE)
-out5 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,link=1,disc=1,disp=TRUE,output=TRUE)
+out4 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,link=1,
+                            disp=TRUE,output=TRUE)
+out5 = est_multi_poly_clust(Y,kU=2,kV=3,W=W,X=X,clust=clust,link=1,
+                            disc=1,disp=TRUE,output=TRUE)
 }
 
 }

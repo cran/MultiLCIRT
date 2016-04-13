@@ -5,6 +5,7 @@ exportPattern("^[[:alpha:]]+")
 # Imported function
 import("MASS")
 import("limSolve")
+importFrom("stats", "pchisq", "rnorm", "runif", "sd")
 
 # S3methods
 S3method(print, class_item)

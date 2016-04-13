@@ -1,5 +1,5 @@
 est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
-                           multi=1:J,piv=NULL,Phi=NULL,gac=NULL,De=NULL,fort=FALSE,tol=10^-10,
+                           multi=NULL,piv=NULL,Phi=NULL,gac=NULL,De=NULL,fort=FALSE,tol=10^-10,
                            disp=FALSE,output=FALSE,out_se=FALSE,glob=FALSE){
 
 #        [piv,Th,Bec,gac,fv,Phi,Pp,lk,np,aic,bic] = est_multi_poly(S,yv,k,start,link,disc,difl,multi,piv,Th,bec,gac)
@@ -35,7 +35,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 # With k=1
 	if(k==1){
 	  cat("fit only for LC model with no other input\n")
-	  link = 0; disc = 0; difl = 0; multi = 1:dim(S)[2]
+	  link = 0; disc = 0; difl = 0#; multi = 1:dim(S)[2]
 	  output = FALSE
 	  X = NULL
 	}
@@ -72,6 +72,11 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 	l = max(S)+1
 	ns = nrow(S); J = ncol(S)
 	n = sum(yv)
+	if(link==0){
+		 if(!is.null(multi)) warning("input multi not used")
+	}else{
+		if(is.null(multi)) multi = 1:J
+	}
 # check number of response categories
 	flag = FALSE
 	for(j in 1:J) if(length(table(S[,j]))<l) flag = TRUE
@@ -207,7 +212,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 		if(cov){
 		    de = NULL; Piv = matrix(1/k,ns,k); piv = NULL				
 	    }else{
-			be = NULL; piv = rep(1,k)/k
+			be = NULL; de = NULL; piv = rep(1,k)/k
 		} # latent class probabilities
 		if(k==1) grid = 0 else grid = seq(-k,k,2*k/(k-1))
 		Phi = array(0,c(l,J,k)) # probability every response
@@ -226,6 +231,7 @@ est_multi_poly <- function(S,yv=rep(1,ns),k,X=NULL,start=0,link=0,disc=0,difl=0,
 			    piv = NULL
 			}else{
 				de = rnorm((k-1)*(ncov+1))/rep(c(1,apply(X,2,sd)),(k-1))
+				Piv = prob_multi_glob(XXdis,logit_cov,de,Xlabel)$P
 				piv = NULL
 			}
 		}else{

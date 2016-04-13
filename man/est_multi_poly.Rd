@@ -9,10 +9,11 @@ assuming a discrete distribution for the ability. Every ability level correspond
 class of subjects in the reference population. Maximum likelihood estimation is based on Expectation-
 Maximization algorithm.}
 
-\usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0, disc = 0,
-		difl = 0, multi = 1:J, piv = NULL, Phi = NULL, gac = NULL, De = NULL, 
-		fort = FALSE, tol = 10^-10, disp = FALSE, output = FALSE, out_se = FALSE,
-		glob = FALSE)}
+\usage{est_multi_poly(S, yv = rep(1,ns), k, X = NULL, start = 0, link = 0,
+               disc = 0, difl = 0, multi = NULL, piv = NULL,
+               Phi = NULL, gac = NULL, De = NULL, fort = FALSE,
+               tol = 10^-10, disp = FALSE, output = FALSE,
+               out_se = FALSE, glob = FALSE)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
@@ -94,7 +95,8 @@ ordinal polytomous item responses, \emph{Communication in Statistics - Theory an
 %}
 
 \examples{
-## Estimation of different Multidimensional LC IRT models with binary responses
+## Estimation of different Multidimensional LC IRT models with binary
+# responses
 # Aggregate data
 data(naep)
 X = as.matrix(naep)
@@ -104,7 +106,8 @@ yv = out$freq
 # Define matrix to allocate each item to one dimension 
 multi1 = rbind(c(1,2,9,10),c(3,5,8,11),c(4,6,7,12))
 # Three-dimensional Rasch model with 3 latent classes
-# the tolerance level has been rise to increase the speed (to be reported to a smaller value)
+# the tolerance level has been rise to increase the speed (to be reported
+# to a smaller value)
 out1 = est_multi_poly(S,yv,k=3,start=0,link=1,multi=multi1,tol=10^-6)
 \dontrun{
 # Three-dimensional 2PL model with 3 latent classes
@@ -112,7 +115,8 @@ out2 = est_multi_poly(S,yv,k=3,start=0,link=1,disc=1,multi=multi1)
 }
 
 \dontrun{
-## Estimation of different Multidimensional LC IRT models with ordinal responses
+## Estimation of different Multidimensional LC IRT models with ordinal
+# responses
 # Aggregate data
 data(hads)
 X = as.matrix(hads)

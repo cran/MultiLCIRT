@@ -7,7 +7,8 @@
 \description{Given different outputs provided by est_multi_poly, the function compare the
 	different models providing a unified table.}
 
-\usage{compare_models(out1, out2, out3=NULL, out4=NULL, out5=NULL, nested=FALSE)}
+\usage{compare_models(out1, out2, out3=NULL, out4=NULL, out5=NULL,
+               nested=FALSE)}
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{

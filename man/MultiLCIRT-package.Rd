@@ -20,8 +20,8 @@ individual covariates affecting the class weights.}
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 2.9\cr
-Date: \tab 2015-02-09\cr
+Version: \tab 2.10\cr
+Date: \tab 2016-04-13\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,
@@ -72,7 +72,8 @@ Bartolucci, F., Bacci, S. and Gnaldi, M. (2014), MultiLCIRT: An R package for mu
 %~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 %}
 \examples{
-## Estimation of different Multidimensional LC IRT models with binary responses
+## Estimation of different Multidimensional LC IRT models with binary
+## responses
 # Aggregate data
 data(naep)
 X = as.matrix(naep)

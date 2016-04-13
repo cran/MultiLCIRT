@@ -7,8 +7,8 @@ against a larger multidimensional model based on a higher number of dimensions. 
 typical example is testing a unidimensional model (and then the hypothesis of unidimensionality)
 against a bidimensional model. Both models are estimated by \code{est_multi_poly}.}
 
-\usage{test_dim(S, yv, k, link = 1, disc = 0, difl = 0, multi0 = 1:J, multi1, tol = 10^-10,
-	            disp = FALSE)}
+\usage{test_dim(S, yv, k, link = 1, disc = 0, difl = 0, multi0 = 1:J,
+         multi1, tol = 10^-10, disp = FALSE)}
 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -72,8 +72,8 @@ S = out$data_dis
 yv = out$freq
 # Define matrix to allocate each item on one dimension 
 multi1 = rbind(c(2,6,7,8,10,11,12),c(1,3,4,5,9,13,14))
-# Compare unidimensional vs bidimensional Graded Response models with free discrimination
-# and free difficulty parameters
+# Compare unidimensional vs bidimensional Graded Response models with free
+# discrimination and free difficulty parameters
 # with less severe tollerance level (to be increased)
 out = test_dim(S,yv,k=3,link=1,disc=1,multi1=multi1,tol=5*10^-4)
 }

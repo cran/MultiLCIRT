@@ -3,8 +3,9 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Compute observed log-likelihood and score}
 \description{Function used within \code{est_multi_poly} to compute observed log-likelihood and score.}
-\usage{lk_obs_score(par_comp,lde,lpar,lga,S,R,yv,k,rm,l,J,fv,link,disc,indga,glob,refitem,miss,
-                    ltype,XXdis,Xlabel,ZZ0,fort)
+\usage{lk_obs_score(par_comp, lde, lpar, lga, S, R, yv, k, rm, l, J, fv, link,
+	         disc, indga, glob, refitem, miss, ltype, XXdis, Xlabel,
+	         ZZ0, fort)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

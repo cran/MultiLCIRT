@@ -1,4 +1,4 @@
-class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
+class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE,tol=10^-10){
 	
 	# print warnign
 	cat("\n * Warning: this function can take a long execution time *\n\n")
@@ -6,7 +6,7 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
 	r = dim(S)[2]
 	multi0 = matrix(1:r,r,1)
 	label0 = -(1:r)
-	out0 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi0,fort=fort,disp=disp)
+	out0 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi0,fort=fort,disp=disp,tol=tol)
 	lk0 = out0$lk; np0 = out0$np
 	lk = NULL; np = NULL; merge = NULL
 	# try to join two clusters
@@ -26,7 +26,7 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
 			ind = which(colSums(multi1)==0)
 			if(length(ind)>0) multi1 = multi1[,-ind]
 			label1 = c(label0[-c(j1,j2)],g) 
-			out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1,fort=fort,disp=disp)
+			out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1,fort=fort,disp=disp,tol=tol)
 			if(out1$lk>bestlk){
 				bestj1 = j1; bestj2 = j2
 				bestlk = out1$lk; bestnp = out1$np; bestmulti1 = multi1; bestlabel1 = label1
@@ -39,7 +39,7 @@ class_item <- function(S,yv,k,link=1,disc=0,difl=0,fort=FALSE,disp=FALSE){
 	}
 	g = g+1
 	multi1 = 1:r
-	out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1,fort=fort,disp=disp)
+	out1 = est_multi_poly(S,yv,k,link=link,disc=disc,difl=difl,multi=multi1,fort=fort,disp=disp,tol=tol)
 	lk = c(lk,out1$lk); np = c(np,out1$np); multi0 = multi1
 	merge = rbind(merge,c(label0[1],label0[2])) 
 	
