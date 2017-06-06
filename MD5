@@ -1,5 +1,5 @@
-899d27e2e3ec2880ad13da2ebc9fb818 *DESCRIPTION
-27bddfd7a12be01dd50478722ff82bb9 *NAMESPACE
+75def25e134b2ef1b2effef5a6af2734 *DESCRIPTION
+559f51df093fbb1937b483e571058d9f *NAMESPACE
 50b6a58fb895e95bc6247fcf9a757390 *R/aggr_data.R
 f43cda274b6571b75e007b1ed5b0e8b1 *R/class_item.R
 efe1cfcd8da958b4557edb6c39451fb6 *R/compare_models.R
@@ -7,7 +7,7 @@ c150e0e2fa7cb601974f70900c7e5dbc *R/est_multi_glob.R
 a8c2974e3f85506d08b0c407b002201e *R/est_multi_poly.R
 f050b9c9d1fc3c8cd3daab040248e33e *R/est_multi_poly_clust.R
 8f2415f2064e968345e44d0328c945da *R/inv_glob.R
-118c3818a48d14148e22ea79644ffe24 *R/lk_obs_score.R
+563772d48b9e7a2fc09a217cdbbbc9ce *R/lk_obs_score.R
 1cfffd3ce35e238fac521885fffbf895 *R/lk_obs_score_clust.R
 9168174b91a17c716bad2288a3b2d0b9 *R/matr_glob.R
 6558be11ec61fa0a90e498125a417faf *R/print.class_item.R
@@ -24,7 +24,7 @@ f14fa902435061629b0b65a3d4424ed6 *R/summary.test_dim.R
 37642b710f245541a57209f06a9fd1b1 *R/test_dim.R
 39df0da65563e372beb4226d8fab9112 *data/hads.RData
 dcdf157e683ef55203d7db60e3ace100 *data/naep.RData
-cbaf3000500603e07ef0a20793268686 *man/MultiLCIRT-package.Rd
+4839041630ee206c1b1ea2de9b02d896 *man/MultiLCIRT-package.Rd
 56f2fed221549204d107142ed807a3b9 *man/aggr_data.Rd
 967924f331371161b6473dc389a095cc *man/class_item.Rd
 472c6ef833998c3e871def2f5fd6de54 *man/compare_models.Rd
@@ -49,5 +49,6 @@ e01bbeabc3d491a06b3e89bab00b8b19 *man/summary.class_item.Rd
 0544955e13cbaf922e2d5c974958456f *man/summary.est_multi_poly_clust.Rd
 85791a9f9d57c7757c3447e22b488a0b *man/summary.test_dim.Rd
 f1df8a08ba78a231175aa5e823d2da86 *man/test_dim.Rd
-fd0953262bed463d5a58726453d06323 *src/aggrdata.f
+4802e11e922a08235765289bc04da77c *src/MultiLCIRT_init.c
+85aa9588d78d056c24e79f589561352c *src/aggrdata.f
 dc9df9a0c3ddfaf22fbaedd5594f2236 *src/lk_obs.f

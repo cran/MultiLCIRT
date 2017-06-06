@@ -20,8 +20,8 @@ individual covariates affecting the class weights.}
 \tabular{ll}{
 Package: \tab MultiLCIRT\cr
 Type: \tab Package\cr
-Version: \tab 2.10\cr
-Date: \tab 2016-04-13\cr
+Version: \tab 2.11\cr
+Date: \tab 2017-05-19\cr
 License: \tab GPL (>= 2)\cr
 }
 Function \code{est_multi_poly} performs the parameter estimation of the following IRT models,
@@ -39,7 +39,7 @@ additive decomposition of difficulty parameters, such as Partial Credit Model an
 The basic input arguments for est_multi_poly are the person-item matrix of available response configurations 
 and the corresponding frequencies, the number of latent classes, the type of link function, the specification of 
 constraints on the discriminating and difficulty item parameters, and the allocation of items to the latent traits. 
-Missing responses are coded with 999, and units and items without responses are automatically removed.
+Missing responses are coded with NA, and units and items without responses are automatically removed.
 
 Function \code{test_dim} performs a likelihood ratio test to choose the optimal number of latent traits (or 
 dimensions) by comparing nested models that differ in the number of latent traits, being all the other

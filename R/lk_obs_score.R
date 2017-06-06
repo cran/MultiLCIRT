@@ -67,7 +67,7 @@ lk_obs_score <- function(par_comp,lde,lpar,lga,S,R,yv,k,rm,l,J,fv,link,disc,indg
 			if(rm==1){
 				ZZ1int = ZZ1[,fv,]	
 			}else{
-				ZZ1int = apply(ZZ1[,fv,],c(1,3),sum)							
+				ZZ1int = apply(array(ZZ1[,fv,],c(dim(ZZ1)[1],rm,dim(ZZ1)[3])),c(1,3),sum)							
 			}
 			ZZ1 = array(ZZ1[,-fv,],dimz)
 			if(l==2) ZZ1int = matrix(ZZ1int,1,length(ZZ1int))				

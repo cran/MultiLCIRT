@@ -22,7 +22,7 @@ c check each row
       	      if(uf==0) then
       	        label(i) = ndis
       	        freq(ndis) = freq(ndis)+1
-      	      end if      	
+      	      end if
             end do
           end if
         end if
